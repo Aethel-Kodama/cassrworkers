@@ -399,7 +399,7 @@ $(function(){
     startingstation: "",
     departureTime: ""
   };
-
+  $("#inputPanel").show();
   $("#applyBtn").on("click", function(){
     if (!$("#departureTime").val().trim()) {
         setNextDepartureTime();
