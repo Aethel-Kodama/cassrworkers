@@ -80,7 +80,7 @@ export default {
       const headers = new Headers();
       headers.append(
         "Set-Cookie",
-        `session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=${60 * 60 * 24 * 7}`
+        `session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`
       );
       headers.set("Location", "https://aethel-kodama.github.io/CAS-SR/");
 
