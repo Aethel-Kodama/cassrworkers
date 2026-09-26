@@ -222,8 +222,8 @@ function setNextDepartureTime(){
 }
 const back = document.querySelector(".戻る");
 const next = document.querySelector(".停車");
-const terminate = document.querySelector(".行先 strong")
-terminate.textContent=stalist[terminatesta]
+const terminate = document.querySelector(".行先 strong");
+if(terminate){terminate.textContent=stalist[terminatesta]}
 nstaname();
 if (back) { // 戻るボタンを押したときの挙動まとめ
     back.addEventListener("click", function(){
