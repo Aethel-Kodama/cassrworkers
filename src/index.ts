@@ -48,10 +48,14 @@ export default {
           redirect_uri: "https://cassrworker.aethel-bassist.workers.dev/callback",
         }),
       });
+      //const tokenData = (await tokenRes.json()) as { access_token?: string };
+      //if (!tokenData.access_token) {
+        //return new Response("トークン取得失敗", { status: 400 });
+      //}
       const tokenData = (await tokenRes.json()) as { access_token?: string };
       if (!tokenData.access_token) {
-        return new Response("トークン取得失敗", { status: 400 });
-      }
+        return new Response(JSON.stringify(tokenData), { status: 400 });
+      }      
 
       const memberRes = await fetch(
         `${DISCORD_API}/users/@me/guilds/1137932995525877841/member`,
