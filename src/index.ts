@@ -3,30 +3,20 @@
 interface Env {
   DISCORD_CLIENT_SECRET: string;
   SESSIONS: KVNamespace;
+  ASSETS: Fetcher;
 }
 
 const DISCORD_API = "https://discord.com/api";
-const ALLOWED_ORIGIN = "https://aethel-kodama.github.io";
-
-function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
-    "Access-Control-Allow-Credentials": "true",
-  };
-}
+const SELF_ORIGIN = "https://cassrworker.aethel-bassist.workers.dev";
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders() });
-    }
-
     if (url.pathname === "/login") {
       const params = new URLSearchParams({
         client_id: "1552100573283876935",
-        redirect_uri: "https://cassrworker.aethel-bassist.workers.dev/callback",
+        redirect_uri: `${SELF_ORIGIN}/callback`,
         response_type: "code",
         scope: "identify guilds.members.read",
       });
@@ -45,17 +35,13 @@ export default {
           client_secret: env.DISCORD_CLIENT_SECRET,
           grant_type: "authorization_code",
           code,
-          redirect_uri: "https://cassrworker.aethel-bassist.workers.dev/callback",
+          redirect_uri: `${SELF_ORIGIN}/callback`,
         }),
       });
-      //const tokenData = (await tokenRes.json()) as { access_token?: string };
-      //if (!tokenData.access_token) {
-        //return new Response("トークン取得失敗", { status: 400 });
-      //}
       const tokenData = (await tokenRes.json()) as { access_token?: string };
       if (!tokenData.access_token) {
-        return new Response(JSON.stringify(tokenData), { status: 400 });
-      }      
+        return new Response("トークン取得失敗", { status: 400 });
+      }
 
       const memberRes = await fetch(
         `${DISCORD_API}/users/@me/guilds/1137932995525877841/member`,
@@ -86,7 +72,7 @@ export default {
         "Set-Cookie",
         `session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`
       );
-      headers.set("Location", "https://aethel-kodama.github.io/CAS-SR/");
+      headers.set("Location", SELF_ORIGIN + "/");
 
       return new Response(null, { status: 302, headers });
     }
@@ -95,15 +81,16 @@ export default {
       const cookie = request.headers.get("Cookie") || "";
       const match = cookie.match(/session=([^;]+)/);
       if (!match) {
-        return Response.json({ loggedIn: false }, { status: 401, headers: corsHeaders() });
+        return Response.json({ loggedIn: false }, { status: 401 });
       }
       const data = await env.SESSIONS.get(match[1]);
       if (!data) {
-        return Response.json({ loggedIn: false }, { status: 401, headers: corsHeaders() });
+        return Response.json({ loggedIn: false }, { status: 401 });
       }
-      return Response.json({ loggedIn: true, user: JSON.parse(data) }, { headers: corsHeaders() });
+      return Response.json({ loggedIn: true, user: JSON.parse(data) });
     }
 
-    return new Response("Not Found", { status: 404 });
+    // それ以外は静的ファイル(CAS-SR本体)を返す
+    return env.ASSETS.fetch(request);
   },
 };
