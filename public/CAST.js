@@ -1,3 +1,11 @@
+fetch("/me")
+  .then((res) => {
+    if (!res.ok) throw new Error("未ログイン");
+    return res.json();
+  })
+  .catch(() => {
+    window.location.href = "/login";
+  });
 function nowtime(){
     const date = new Date();
     const hours = date.getHours();
