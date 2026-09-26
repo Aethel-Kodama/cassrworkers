@@ -9,7 +9,46 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=M+PLUS+1p&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
 </head>
-<body> 
+<body>
+    <div id="inputPanel">
+    <h2>次はどこに行きましょう。</h2>
+
+    <div class="field">
+    <label for="trainType">種別</label>
+        <select id="trainType" required>
+        <option value="普通">普通</option>
+        <option value="快速">快速</option>
+        <option value="快急">快速急行</option>
+        <option value="準急">準急</option>
+        <option value="急行">急行</option>
+        <option value="特急">特急</option>
+        </select>
+    </div>
+
+    <div class="field">
+        <label for="startingstation">始発駅</label>
+        <select id="startingstation"></select>
+    </div>
+
+    <div class="field">
+        <label for="destination" >終点</label>
+        <select id="destination" required></select>
+    </div>
+
+    <div class="field">
+        <label for="departureTime">始発駅発車時刻</label>
+        <input id="departureTime" type="time" step="1" value="11:45:14" required>
+    </div>
+
+    <div class="field">
+        <label for="departureTime">終着駅到着時刻</label>
+        <span class="laststoparr">12:34:56</span>
+    </div>
+
+    <button id="applyBtn">この行路で乗務する</button>
+
+  
+</div>
     <header>
         <ul>
             <li class="運行" style="background-color:#040000;"><h3>2317F</h3></li>
