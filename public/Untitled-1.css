@@ -1,4 +1,8 @@
 @charset "UTF-8";
+input[type="time"]::-webkit-date-and-time-value {
+    padding-top: 10px;
+    text-align: left !important;
+}
 html,
 body{
     scrollbar-width:none;
@@ -38,7 +42,7 @@ li {
     border-radius:3px;
 }
 
-menu{
+.menu{
     display:flex;
     background-color:rgb(36, 36, 36);
     justify-content:flex-start;
@@ -74,6 +78,9 @@ menu{
     font-size:12px;
     font-weight:bold;
 }
+.運行 h4{
+    padding: 0px 5px 0px 5px;
+}
 
 aside{
     margin-left:10px;
@@ -81,13 +88,14 @@ aside{
 }
 .プレビュー{
     width: 100px;
-    height: 33px;
+    height: 7vh;
     border-color: #0167ff;
     border-width: 1px;
     border-style: groove;
     border-radius: 5px;
     padding: 5px;
     margin: 0px;
+    position: relative;
 }
 .戻る{
     position: fixed;
@@ -98,27 +106,36 @@ aside{
     z-index: 3;    
 }
 .停車{
-    position:fixed; 
+    user-select: none;
+    position:fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 35px;
     bottom: 0px;
-    width: auto;
-   right:10px;
-   z-index: 3;
+    margin:0;
+    width: 100px;
+    border-radius: 1vh;
+    right:10px;
+    z-index: 3;
+    background-color: #0167ff;
 }
 .標準時分{
+    position:relative;
     white-space: nowrap;
-    width: 20px;
+    width: 7vw;
     margin: 0px;
-    padding: 5px 10px 5px 0px;
+    padding: 5px 0px 5px 0px;
     border-right: 3px solid #75777c;
 }
-.標準時分 span{
+.標準時分 .min{
     margin: 0px;
-    font-size: 15px;
+    font-size: 3vh;
 }
+.標準時分 .sec{font-size: 2vh;}
 .次駅詳細{
     position: absolute;
-    top: 409px;
+    top: 70vh;
     left: 150px;
     width: 270px;
     height: 97px;
@@ -129,7 +146,7 @@ aside{
 }
 .次々駅詳細{
     position: absolute;
-    top: 335px;
+    top: 55vh;
     left: 160px;
     width: 250px;
     height: 50px;
@@ -140,7 +157,7 @@ aside{
 }
 .次々々駅詳細{
     position: absolute;
-    top: 255px;
+    top: 43vh;
     left: 160px;
     width: 250px;
     height: 50px;
@@ -155,22 +172,31 @@ aside{
     top: -55px;
     font-size: 20px;
     left:130px;
-    width: 20px;
+    width: 4.6vw;
     height: 30px;
+    display: none;
 }
 .次駅停車時分{
     position: relative;
-    top: -50px;
+    top: -50px;    
     left: 0px;
+    left:130px;
     font-size: 19px;
     padding:0px 0px 0px 5px;
 }
 .次駅停車秒{
     position: relative;
-    top: -83px;
+    top: -87px;
     left: 53px;
+    left:183px;
     font-size: 15px;
     padding:0px 0px 0px 5px;
+}
+.発車まで{
+    position:relative;
+    top:-80px;
+    left:6px;
+    font-size: 13px;
 }
 .次駅詳細 .駅名{
     position: relative;
@@ -199,10 +225,11 @@ aside{
     position: relative;
     top: -38px;
     left: 120px;
-    width: 15px;
+    width: 3.7vw;
     background-color: #224ed1;
     padding: 2px;
     border-radius: 2px;
+    display: none;
 }
 .次々駅詳細 .番線{
     position: relative;
@@ -226,7 +253,7 @@ header.行先{
     background-color: #040000;
     padding: 5px;
     text-align: bottom;
-    height: 17px;
+    height: 5vh;
     z-index: 10;
 }
 div.時刻{
@@ -254,13 +281,18 @@ div.時刻 p{
     font-size: 15px;
     font-weight: bold;
 }
-
+.laststoparr{
+    color:#000000;
+    font-size: 20px;
+    margin-left:5px;
+    border-bottom: 2px solid rgb(255, 0, 0);
+}
 .背景画像{
     position: absolute;
-    top: 250px;
-    left: 170px;
-    width: 250px;
-    height: 340px;
+    top: 42vh;
+    left: 30vw;
+    width: 50vw;
+    height: 56%;
     z-index: 0;
 }
 .地図画像{
@@ -271,7 +303,34 @@ div.時刻 p{
     height: 70%;
     width: auto;
     width:50px;}
-/* ---------- 入力パネル ---------- */
+
+html,
+body{
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar{
+    display:none;
+}
+body{
+    background-color:#040000;
+    color:#ffffff;
+    font-family:Arial, Helvetica, sans-serif;
+    opacity:1;
+}
+  :root{
+    --panel-bg:#0d0d0d;
+    --accent:#ffb400;
+    --accent2:#3ad1ff;
+    --text:#f2f2f2;
+    --sub:#8a8a8a;
+    --border:#2a2a2a;
+  }
+  *{box-sizing:border-box;}
+  
+
+  /* ---------- 入力パネル ---------- */
   #inputPanel{
     background:#ffffff;
     color:#111;
