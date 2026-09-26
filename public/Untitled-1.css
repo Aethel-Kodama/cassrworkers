@@ -271,3 +271,62 @@ div.時刻 p{
     height: 70%;
     width: auto;
     width:50px;}
+/* ---------- 入力パネル ---------- */
+  #inputPanel{
+    background:#ffffff;
+    color:#111;
+    border-radius:12px;
+    padding:20px 24px;
+    width:320px;
+    box-shadow:0 4px 16px rgba(0,0,0,0);
+    position: fixed;        /* 画面に固定 */
+    top: 50%;               /* 画面中央 */
+    left: 50%;
+    width:300px;
+    transform: translate(-50%, -50%);
+    z-index: 9999;          /* 最前面に表示 */
+     /* 半透明背景（好みで変更） */
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+    pointer-events: auto;
+    display: block;
+  }
+  #inputPanel h2{
+    font-size:16px;
+    color:#040405;
+    margin:0 0 16px;
+    border-bottom:2px solid var(--accent);
+    padding-bottom:8px;
+  }
+  .field{
+    margin-bottom:14px;
+  }
+  .field label{
+    display:block;
+    font-size:12px;
+    color:#111010;
+    margin-bottom:4px;
+  }
+  .field select,
+  .field input{
+    width:100%;
+    padding:8px 10px;
+    font-size:14px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    background:#fafafa;
+  }
+  #applyBtn{
+    width:100%;
+    padding:10px;
+    margin-top:8px;
+    border:none;
+    border-radius:6px;
+    background:#111;
+    color:#fff;
+    font-size:14px;
+    font-weight:bold;
+    cursor:pointer;
+  }
+  #applyBtn:hover{background:#333;}

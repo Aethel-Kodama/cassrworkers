@@ -25,7 +25,7 @@ fetch("/me")
     let dm;
     let ds;
 function delay(dat){
-    const delays = document.querySelector(".発車まで")
+    const delays = document.querySelector(".発車まで");if (!delays) return;
     if (currenttime){
         if(currenttime>dat){
             delayMs = currenttime-dat;
@@ -252,6 +252,7 @@ if (next) { //進むボタンを押したときの挙動まとめ
     next.addEventListener("click", function(){
         if (nowsta == terminatesta&&next.textContent=="停車"){
             setNextDepartureTime();
+            updateArrival();
             $("#inputPanel").show();
             $("#startingstation").val(nowsta);
 
@@ -293,25 +294,26 @@ if (next) { //進むボタンを押したときの挙動まとめ
 };
 const trainCount = document.querySelector(".両数");
 if (trainCount) trainCount.textContent = "２";
-
-const restriction = document.querySelector(".制限");
-if (restriction&&startingsta<6&&6<=terminatesta&&direction==1) {
-    restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー比良&nbsp;<strong>120</strong> km/h<br>比良ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>105</strong> km/h";
-}
-else if(restriction&&direction==1&&startingsta>=6){
-    restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>105</strong> km/h";
-}
-else if(restriction&&direction==1&&terminatesta<=6)
-{   restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>120</strong> km/h"}
-else if(restriction&&terminatesta<=6&&6<startingsta&&direction==-1){
-    restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー比良&nbsp;<strong>105</strong> km/h<br>比良ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>120</strong> km/h";
-}
-else if(restriction&&terminatesta>6&&direction==-1){
-    restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>105</strong> km/h";
-}
-else if(restriction&&startingsta<=6&&direction==-1){
-    restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>120</strong> km/h"
-}
+function updateRestriction(){
+  const restriction = document.querySelector(".制限");
+  if (restriction&&startingsta<6&&6<=terminatesta&&direction==1) {
+      restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー比良&nbsp;<strong>120</strong> km/h<br>比良ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>105</strong> km/h";
+  }
+  else if(restriction&&direction==1&&startingsta>=6){
+      restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>105</strong> km/h";
+  }
+  else if(restriction&&direction==1&&terminatesta<=6)
+  {   restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>120</strong> km/h"}
+  else if(restriction&&terminatesta<=6&&6<startingsta&&direction==-1){
+      restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー比良&nbsp;<strong>105</strong> km/h<br>比良ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>120</strong> km/h";
+  }
+  else if(restriction&&terminatesta>6&&direction==-1){
+      restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>105</strong> km/h";
+  }
+  else if(restriction&&startingsta<=6&&direction==-1){
+      restriction.innerHTML = stalist[startingsta].slice(0,2)+"ー"+stalist[terminatesta].slice(0,2)+"&nbsp;<strong>120</strong> km/h"
+  }}
+updateRestriction();
 function startDate(deptime){//Date型に変換
     let [h, m, s] = (deptime).split(':')
     if (s === undefined) s = '00'
@@ -374,9 +376,12 @@ function terminatearr(starttime,startsta,termsta){
         let ss = String($dep.getSeconds()).padStart(2, "0");
         return hh+":"+mm+":"+ss;
 }
-$("select,input").on("change",function(){
-    $(".laststoparr").text(terminatearr($("#departureTime").val(),Number($("#startingstation").val()),Number($("#destination").val())))
-})
+function updateArrival(){
+    $(".laststoparr").text(
+        terminatearr($("#departureTime").val(), Number($("#startingstation").val()), Number($("#destination").val()))
+    );
+}
+$("select,input").on("change", updateArrival);
 $(function(){
    
   // 終点の選択肢リストz
@@ -399,6 +404,7 @@ $(function(){
     startingstation: "",
     departureTime: ""
   };
+  updateArrival();
   $("#inputPanel").show();
   $("#applyBtn").on("click", function(){
     if (!$("#departureTime").val().trim()) {
@@ -415,6 +421,7 @@ $(function(){
     currenttime=startDate(dept)
     if(terminatesta>nowsta){direction=1}
     else{direction=-1}
+    updateRestriction();
     staname();
     nstaname();
     terminating();
