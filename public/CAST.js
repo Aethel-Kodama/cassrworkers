@@ -1,11 +1,13 @@
-fetch("/me")
-  .then((res) => {
-    if (!res.ok) throw new Error("未ログイン");
-    return res.json();
-  })
-  .catch(() => {
-    window.location.href = "/login";
-  });
+if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
+    fetch("/me")
+      .then((res) => {
+        if (!res.ok) throw new Error("未ログイン");
+        return res.json();
+      })
+      .catch(() => {
+        window.location.href = "/login";
+      });
+}
 //定義
     
     let direction = -1; //SSR -> INZ:1,INZ -> SSR:-1
