@@ -1,19 +1,136 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hello, World!</title>
-	</head>
-	<body>
-		<h1 id="heading"></h1>
-		<script>
-			fetch('/message')
-				.then((resp) => resp.text())
-				.then((text) => {
-					const h1 = document.getElementById('heading');
-					h1.textContent = text;
-				});
-		</script>
-	</body>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAS-SR</title>
+    <link rel="stylesheet" href="Untitled-1.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=M+PLUS+1p&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="inputPanel">
+    <h2>次はどこに行きましょう。</h2>
+
+    <div class="field">
+    <label for="trainType">種別</label>
+        <select id="trainType" required>
+        <option value="普通">普通</option>
+        <option value="快速">快速</option>
+        <option value="快急">快速急行</option>
+        <option value="準急">準急</option>
+        <option value="急行">急行</option>
+        <option value="特急">特急</option>
+        </select>
+    </div>
+
+    <div class="field">
+        <label for="startingstation">始発駅</label>
+        <select id="startingstation"></select>
+    </div>
+
+    <div class="field">
+        <label for="destination" >終点</label>
+        <select id="destination" required></select>
+    </div>
+
+    <div class="field">
+        <label for="departureTime">始発駅発車時刻</label>
+        <input id="departureTime" type="time" step="1" value="11:45:14" required>
+    </div>
+
+    <div class="field">
+        <label for="departureTime">終着駅到着時刻</label>
+        <span class="laststoparr">12:34:56</span>
+    </div>
+
+    <button id="applyBtn">この行路で乗務する</button>
+
+  
+</div>
+    <header>
+        <ul>
+            <li class="運行" style="background-color:#040000;"><h3>2317F</h3></li>
+            <li class="運行"><h4> 　313　</h4></li>
+            <li class="両数">４</li>
+            <li style="background-color:#040000; border-radius:10px;">四城ー狩川 <strong>120</strong> km/h
+            <br>比良ー稲生 <strong>105</strong> km/h</li>
+        </ul>
+    </header>
+    <menu>
+        <div class="通告1">
+            
+            <p>通告</p>
+            <br>
+            <p>着発線変更</p>
+            <p>　</p>
+            <h4>木曽川</h4>
+            <h5>下本</h5>
+            
+        </div>
+        <div class="通告1">
+            
+            <p>通告</p>
+            <br>
+            <p>着発線変更</p>
+            <p>　</p>
+            <h4>木曽川</h4>
+            <h5>下本</h5>
+            
+        </div>
+    </menu>
+    <header class="行先">
+        <h4><strong style="font-size:12px;">豊橋</strong> 行き</h4>
+    </header>
+    <aside>
+        <div class="次々々々駅">
+            <h3 class="プレビュー">木曽川</h3>
+            <h3 class="標準時分"><span>2</span> 15</h3>
+        </div>
+        <div class="次々々駅">
+            <h3 class="プレビュー">尾張一宮</h3>
+            <h3 class="標準時分"><span>2</span> 15</h3>
+        </div>
+        <div class="次々駅">
+            <h3 class="プレビュー">稲沢西</h3>
+            <h3 class="標準時分"><span>2</span> 30</h3>
+        </div>
+        <div class="次駅">
+            <h3 class="プレビュー">稲沢</h3>
+            <h3 class="標準時分"><span>2</span> 45</h3>
+        </div>
+        <div class="前駅">
+            <h3 class="プレビュー" style="margin-bottom:0px;color:hsla(0, 0%, 100%, 0.621);border: 1px solid #224ed1d5;">清洲</h3>
+            <h3 class="標準時分" style="margin-bottom:0px;color:hsla(0, 0%, 100%, 0.621);"><span>2</span> 45</h3>
+        </div>
+    </aside>
+    <img src="./スクリーンショット 2026-09-08 004535.png" class="背景画像">
+    <div class="次々々駅詳細">
+        <h2 class="駅名">稲沢西</h2>
+        <h2 class="停通">停</h2>
+        <h2 class="番線">下1</h2>
+    </div>
+    <div class="次々駅詳細">
+        <h2 class="駅名">稲沢</h2>
+        <h2 class="停通">停</h2>
+        <h2 class="番線">下1</h2>
+    </div>
+    <div class="次駅詳細">
+        <h2 class="駅名">清洲</h2>
+        <h2 class="停通">停</h2>
+        <h2 class="次駅停車時分">13.45</h2>
+        <h2 class="次駅停車秒">03</h2>
+        <h2 class="番線">下1</h2>
+    </div>
+    <div class="時刻">
+        <h3>13:45 </h3>
+        <p>&nbsp;03</p>
+    </div>
+    <img src="戻る.png"class="戻る">
+    <img src="停車.png"class="停車">
+    <img src="./地図.png" class="地図画像">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="CAST.js"></script>
+</body>
 </html>
