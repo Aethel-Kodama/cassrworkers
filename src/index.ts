@@ -1,5 +1,10 @@
 // src/index.ts
 
+interface Env {
+  DISCORD_CLIENT_SECRET: string;
+  SESSIONS: KVNamespace;
+}
+
 const DISCORD_API = "https://discord.com/api";
 const ALLOWED_ORIGIN = "https://aethel-kodama.github.io";
 
@@ -11,64 +16,60 @@ function corsHeaders() {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    // preflight対応
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: corsHeaders() });
     }
 
-    // 1. ログイン開始
     if (url.pathname === "/login") {
       const params = new URLSearchParams({
-        client_id: env.DISCORD_CLIENT_ID,
-        redirect_uri: env.DISCORD_REDIRECT_URI, // cassrworkers側の/callback
+        client_id: "1552100573283876935",
+        redirect_uri: "https://cassrworker.aethel-bassist.workers.dev/callback",
         response_type: "code",
         scope: "identify guilds.members.read",
       });
       return Response.redirect(`${DISCORD_API}/oauth2/authorize?${params}`, 302);
     }
 
-    // 2. Discordからのコールバック
     if (url.pathname === "/callback") {
       const code = url.searchParams.get("code");
       if (!code) return new Response("code がありません", { status: 400 });
 
-      // コードをアクセストークンに交換
       const tokenRes = await fetch(`${DISCORD_API}/oauth2/token`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
-          client_id: env.DISCORD_CLIENT_ID,
+          client_id: "1552100573283876935",
           client_secret: env.DISCORD_CLIENT_SECRET,
           grant_type: "authorization_code",
           code,
-          redirect_uri: env.DISCORD_REDIRECT_URI,
+          redirect_uri: "https://cassrworker.aethel-bassist.workers.dev/callback",
         }),
       });
-      const tokenData = await tokenRes.json();
+      const tokenData = (await tokenRes.json()) as { access_token?: string };
       if (!tokenData.access_token) {
         return new Response("トークン取得失敗", { status: 400 });
       }
 
-      // ギルドメンバー情報(ロール含む)を取得
       const memberRes = await fetch(
-        `${DISCORD_API}/users/@me/guilds/${env.GUILD_ID}/member`,
+        `${DISCORD_API}/users/@me/guilds/1137932995525877841/member`,
         { headers: { Authorization: `Bearer ${tokenData.access_token}` } }
       );
       if (!memberRes.ok) {
         return new Response("サーバーに参加していません", { status: 403 });
       }
-      const member = await memberRes.json();
+      const member = (await memberRes.json()) as {
+        roles?: string[];
+        user: { id: string; username: string };
+      };
 
-      // 指定ロールを持っているかチェック
-      const authorized = member.roles?.includes(env.REQUIRED_ROLE_ID);
+      const authorized = member.roles?.includes("1170176484917379143");
       if (!authorized) {
         return new Response("権限がありません", { status: 403 });
       }
 
-      // セッション発行してKVに保存
       const sessionId = crypto.randomUUID();
       await env.SESSIONS.put(
         sessionId,
@@ -81,12 +82,11 @@ export default {
         "Set-Cookie",
         `session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=${60 * 60 * 24 * 7}`
       );
-      headers.set("Location", env.PAGES_URL);
+      headers.set("Location", "https://aethel-kodama.github.io/CAS-SR/");
 
       return new Response(null, { status: 302, headers });
     }
 
-    // 3. ログイン状態確認(CAS-SR側から呼ぶ)
     if (url.pathname === "/me") {
       const cookie = request.headers.get("Cookie") || "";
       const match = cookie.match(/session=([^;]+)/);
