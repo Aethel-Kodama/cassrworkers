@@ -146,7 +146,7 @@ aside{
 }
 .標準時分{
     position:relative;
-    white-space: nowrap;
+
     width: 35.28px;  /* 7vw → 504px基準 */
     margin: 0;
     height: 30px;    /* 5vh → 600px基準 */
@@ -162,7 +162,10 @@ aside{
 }
 .標準時分 .sec{font-size: 12px;} /* 2vh → 600px基準 */
 .次駅詳細{
+    padding: auto;
     position: absolute;
+    display: flex;
+    flex-wrap:wrap;
     top: 420px; /* 70vh → 600px基準 */
     left: 150px;
     width: 270px;
@@ -171,6 +174,7 @@ aside{
     border: 1px solid #224ed1;
     border-radius: 5px;
     background-color: #1e1e1e;
+    white-space: normal;
 }
 .次々駅詳細{
     position: absolute;
@@ -194,44 +198,66 @@ aside{
     border-radius: 5px;
     background-color: #1e1e1e;
 }
-
-.次駅詳細 .停通{
+.停通{
     position: relative;
-    top: -55px;
+    top: -38px;
+    left: 120px;
+    width: 18.648px; /* 3.7vw → 504px基準 */
+    background-color: #224ed1;
+    padding: 2px;
+    border-radius: 2px;
+    display: none;
+}
+.次駅詳細 .停通{
+    position: static;
+    margin:0;
+    top:0;
+    left:0;
     font-size: 20px;
-    left:130px;
     width: 23.184px; /* 4.6vw → 504px基準 */
     height: 30px;
     display: none;
 }
-.次駅停車時分{
+.次駅停車枠{
     position: relative;
-    top: -50px;    
-    left: 0px;
-    left:130px;
+    height: 26px;
+    width: 93px;
+    padding-left:7px;
+    display: flex;
+    align-items: flex-end; /* 下端を揃える */
+    gap: 6px;
+    margin-top:0;
+}
+
+.次駅発着時刻.停車中{
+    left: 130px;
+}
+.次駅停車時分{
     font-size: 19px;
-    padding:0px 0px 0px 5px;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
 }
 .次駅停車秒{
-    position: relative;
-    top: -87px;
-    left: 53px;
-    left:183px;
     font-size: 15px;
-    padding:0px 0px 0px 5px;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
 }
 .発車まで{
     position:relative;
-    top:-80px;
-    left:6px;
+    height:26px;
     font-size: 13px;
+    margin:0;
+    padding-left:7px;
 }
 .次駅詳細 .駅名{
     position: relative;
-    top: -8px;
     font-size: 20px;
     width: 150px;
     padding-left: 5px;
+    height:30px;
+    margin:0;
 }
 .次々駅詳細 .駅名{
     position: relative;
@@ -249,16 +275,7 @@ aside{
     left: 150px;
     width: 30px;
 }
-.停通{
-    position: relative;
-    top: -38px;
-    left: 120px;
-    width: 18.648px; /* 3.7vw → 504px基準 */
-    background-color: #224ed1;
-    padding: 2px;
-    border-radius: 2px;
-    display: none;
-}
+
 .次々駅詳細 .番線{
     position: relative;
     top: -75px;

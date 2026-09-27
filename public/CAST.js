@@ -69,14 +69,12 @@ function delay(dat){
     }
 }
 function view(){//停車中の表示
-    $(".次駅停車時分").css("left","130px")
-    $(".次駅停車秒").css("left","183px")
+    $(".次駅発着時刻").addClass("停車中");
     $(".発車まで").css("display","inline")
     $(".次駅詳細 .停通").css("display","none")
 }
 function unview(){
-    $(".次駅停車時分").css("left","0px")
-    $(".次駅停車秒").css("left","53px")
+    $(".次駅発着時刻").removeClass("停車中");
     $(".発車まで").css("display","none")
     $(".次駅詳細 .停通").css("display","inline")
 }
