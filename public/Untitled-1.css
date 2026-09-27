@@ -1,4 +1,10 @@
 @charset "UTF-8";
+
+/* ==========================================================
+   スケーリング基準(デザイン基準解像度): 504 x 600 px
+   (実際にレイアウトを目視調整していたウィンドウサイズ)
+   ========================================================== */
+
 input[type="time"]::-webkit-date-and-time-value {
     padding-top: 10px;
     text-align: left !important;
@@ -7,6 +13,9 @@ html,
 body{
     scrollbar-width:none;
     -ms-overflow-style:none;
+    margin:0px;
+    height:100%;
+    overflow:hidden; /* はみ出た分(レターボックス)でスクロールバーが出ないように */
 }
 html::-webkit-scrollbar,
 body::-webkit-scrollbar{
@@ -17,12 +26,24 @@ body{
     color:#ffffff;
     font-family:Arial, Helvetica, sans-serif;
     font-size:10px;
-    margin:0px;
     opacity:1;
+    /* #stage を常に画面中央に配置する */
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
-
-
+/* 実際のレイアウトは全部この中に入れ、まるごと transform:scale() する */
+#stage{
+    position:relative;
+    width:504px;
+    height:600px;
+    flex-shrink:0;
+    background-color:#040000;
+    /* transform-origin は既定の中央(50% 50%)のまま。
+       body の flex 中央寄せと組み合わせることで、
+       拡大縮小しても常に画面中央に収まる */
+}
 
 strong{
     font-size:20px;
@@ -87,8 +108,8 @@ aside{
     
 }
 .プレビュー{
-    width: 100px;
-    height: 7vh;
+    width: 100.8px;   /* 20vw → 504px基準 */
+    height: 42px;     /* 7vh → 600px基準 */
     border-color: #0167ff;
     border-width: 1px;
     border-style: groove;
@@ -115,7 +136,7 @@ aside{
     bottom: 0px;
     margin:0;
     width: 100px;
-    border-radius: 1vh;
+    border-radius: 6px; /* 1vh → 600px基準 */
     right:10px;
     z-index: 3;
     background-color: #0167ff;
@@ -123,19 +144,23 @@ aside{
 .標準時分{
     position:relative;
     white-space: nowrap;
-    width: 7vw;
-    margin: 0px;
-    padding: 5px 0px 5px 0px;
+    width: 35.28px;  /* 7vw → 504px基準 */
+    margin: 0;
+    height: 30px;    /* 5vh → 600px基準 */
+    display: flex;
+    padding-top: 4px;
+    align-items: baseline;
+    justify-content: space-around;
     border-right: 3px solid #75777c;
 }
 .標準時分 .min{
     margin: 0px;
-    font-size: 3vh;
+    font-size: 18px; /* 3vh → 600px基準 */
 }
-.標準時分 .sec{font-size: 2vh;}
+.標準時分 .sec{font-size: 12px;} /* 2vh → 600px基準 */
 .次駅詳細{
     position: absolute;
-    top: 70vh;
+    top: 420px; /* 70vh → 600px基準 */
     left: 150px;
     width: 270px;
     height: 97px;
@@ -146,7 +171,7 @@ aside{
 }
 .次々駅詳細{
     position: absolute;
-    top: 55vh;
+    top: 330px; /* 55vh → 600px基準 */
     left: 160px;
     width: 250px;
     height: 50px;
@@ -157,7 +182,7 @@ aside{
 }
 .次々々駅詳細{
     position: absolute;
-    top: 43vh;
+    top: 258px; /* 43vh → 600px基準 */
     left: 160px;
     width: 250px;
     height: 50px;
@@ -172,7 +197,7 @@ aside{
     top: -55px;
     font-size: 20px;
     left:130px;
-    width: 4.6vw;
+    width: 23.184px; /* 4.6vw → 504px基準 */
     height: 30px;
     display: none;
 }
@@ -225,7 +250,7 @@ aside{
     position: relative;
     top: -38px;
     left: 120px;
-    width: 3.7vw;
+    width: 18.648px; /* 3.7vw → 504px基準 */
     background-color: #224ed1;
     padding: 2px;
     border-radius: 2px;
@@ -253,7 +278,7 @@ header.行先{
     background-color: #040000;
     padding: 5px;
     text-align: bottom;
-    height: 5vh;
+    height: 30px; /* 5vh → 600px基準 */
     z-index: 10;
 }
 div.時刻{
@@ -289,9 +314,9 @@ div.時刻 p{
 }
 .背景画像{
     position: absolute;
-    top: 42vh;
-    left: 30vw;
-    width: 50vw;
+    top: 252px;    /* 42vh → 600px基準 */
+    left: 151.2px; /* 30vw → 504px基準 */
+    width: 252px;  /* 50vw → 504px基準 */
     height: 56%;
     z-index: 0;
 }
@@ -302,81 +327,65 @@ div.時刻 p{
     z-index: 0;
     height: 70%;
     width: auto;
-    width:50px;}
+    width:50px;
+}
 
-html,
-body{
-    scrollbar-width:none;
-    -ms-overflow-style:none;
-}
-html::-webkit-scrollbar,
-body::-webkit-scrollbar{
-    display:none;
-}
-body{
-    background-color:#040000;
-    color:#ffffff;
-    font-family:Arial, Helvetica, sans-serif;
-    opacity:1;
-}
-  :root{
+:root{
     --panel-bg:#0d0d0d;
     --accent:#ffb400;
     --accent2:#3ad1ff;
     --text:#f2f2f2;
     --sub:#8a8a8a;
     --border:#2a2a2a;
-  }
-  *{box-sizing:border-box;}
-  
+}
+*{box-sizing:border-box;}
 
-  /* ---------- 入力パネル ---------- */
-  #inputPanel{
+/* ---------- 入力パネル ---------- */
+#inputPanel{
     background:#ffffff;
     color:#111;
     border-radius:12px;
     padding:20px 24px;
     width:320px;
     box-shadow:0 4px 16px rgba(0,0,0,0);
-    position: fixed;        /* 画面に固定 */
-    top: 50%;               /* 画面中央 */
+    position: fixed;        /* #stage を基準に固定される(transformにより) */
+    top: 50%;
     left: 50%;
     width:300px;
     transform: translate(-50%, -50%);
-    z-index: 9999;          /* 最前面に表示 */
-     /* 半透明背景（好みで変更） */
+    z-index: 9999;
     padding: 20px;
     border-radius: 10px;
     color: white;
     pointer-events: auto;
     display: block;
-  }
-  #inputPanel h2{
+}
+#inputPanel h2{
     font-size:16px;
     color:#040405;
     margin:0 0 16px;
     border-bottom:2px solid var(--accent);
     padding-bottom:8px;
-  }
-  .field{
+}
+.field{
     margin-bottom:14px;
-  }
-  .field label{
+}
+.field label{
     display:block;
     font-size:12px;
     color:#111010;
     margin-bottom:4px;
-  }
-  .field select,
-  .field input{
+}
+.field select,
+.field input{
     width:100%;
     padding:8px 10px;
     font-size:14px;
     border:1px solid #ccc;
     border-radius:6px;
     background:#fafafa;
-  }
-  #applyBtn{
+}
+#applyBtn{
     width:100%;
     padding:10px;
     margin-top:8px;
@@ -387,5 +396,5 @@ body{
     font-size:14px;
     font-weight:bold;
     cursor:pointer;
-  }
-  #applyBtn:hover{background:#333;}
+}
+#applyBtn:hover{background:#333;}

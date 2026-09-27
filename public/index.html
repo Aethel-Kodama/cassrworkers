@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CAS-SR</title>
     <link rel="stylesheet" href="Untitled-1.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,45 +10,53 @@
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=M+PLUS+1p&family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
 </head>
 <body>
+<!--
+  #stage は 504×600px(実際にレイアウトを目視調整していたサイズ)の固定サイズで組んだ画面。
+  下部の <script> がウィンドウ/画面サイズに合わせて transform:scale() をかけ、
+  常に中央に収まるように拡大縮小する。
+  position:fixed の要素は transform を持つ #stage が基準になるので、
+  そのままレイアウトが保たれる。
+-->
+<div id="stage">
     <div id="inputPanel">
-    <h2>次はどこに行きましょう。</h2>
+        <h2>次はどこに行きましょう。</h2>
 
-    <div class="field">
-    <label for="trainType">種別</label>
-        <select id="trainType" required>
-        <option value="普通">普通</option>
-        <option value="快速">快速</option>
-        <option value="快急">快速急行</option>
-        <option value="準急">準急</option>
-        <option value="急行">急行</option>
-        <option value="特急">特急</option>
-        </select>
+        <div class="field">
+        <label for="trainType">種別</label>
+            <select id="trainType" required>
+            <option value="普通">普通</option>
+            <option value="快速">快速</option>
+            <option value="快急">快速急行</option>
+            <option value="準急">準急</option>
+            <option value="急行">急行</option>
+            <option value="特急">特急</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="startingstation">始発駅</label>
+            <select id="startingstation"></select>
+        </div>
+
+        <div class="field">
+            <label for="destination" >終点</label>
+            <select id="destination" required></select>
+        </div>
+
+        <div class="field">
+            <label for="departureTime">始発駅発車時刻</label>
+            <input id="departureTime" type="time" step="1" value="11:45:14" required>
+        </div>
+
+        <div class="field">
+            <label for="departureTime">終着駅到着時刻</label>
+            <span class="laststoparr">12:34:56</span>
+        </div>
+
+        <button id="applyBtn">この行路で乗務する</button>
+
+
     </div>
-
-    <div class="field">
-        <label for="startingstation">始発駅</label>
-        <select id="startingstation"></select>
-    </div>
-
-    <div class="field">
-        <label for="destination" >終点</label>
-        <select id="destination" required></select>
-    </div>
-
-    <div class="field">
-        <label for="departureTime">始発駅発車時刻</label>
-        <input id="departureTime" type="time" step="1" value="11:45:14" required>
-    </div>
-
-    <div class="field">
-        <label for="departureTime">終着駅到着時刻</label>
-        <span class="laststoparr">12:34:56</span>
-    </div>
-
-    <button id="applyBtn">この行路で乗務する</button>
-
-  
-</div>
     <header>
         <ul>
             <li class="運行" style="background-color:#040000;"><h3>2317F</h3></li>
@@ -127,11 +135,32 @@
         <h3>13:45 </h3>
         <p>&nbsp;03</p>
     </div>
-    
+
     <img src="https://github.com/Aethel-Kodama/CAS-SR/blob/main/%E6%88%BB%E3%82%8B.png?raw=true"class="戻る">
     <h3 class="停車">次へ</h3>
     <img src="https://github.com/Aethel-Kodama/CAS-SR/blob/main/%E5%9C%B0%E5%9B%B3.png?raw=true" class="地図画像">
+</div>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="CAST.js"></script>
+    <script>
+        // #stage を画面サイズに合わせて拡大縮小して常に中央に表示する
+        (function () {
+            var DESIGN_W = 504;
+            var DESIGN_H = 600;
+            var stage = document.getElementById('stage');
+
+            function fitStage() {
+                var vw = window.innerWidth;
+                var vh = window.innerHeight;
+                // 画面に収まる最大倍率(はみ出さないよう小さい方に合わせる)
+                var scale = Math.min(vw / DESIGN_W, vh / DESIGN_H);
+                stage.style.transform = 'scale(' + scale + ')';
+            }
+
+            window.addEventListener('resize', fitStage);
+            window.addEventListener('orientationchange', fitStage);
+            fitStage();
+        })();
+    </script>
 </body>
 </html>

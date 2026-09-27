@@ -8,6 +8,7 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
         window.location.href = "/login";
       });
 }
+
 //定義
     
     let direction = -1; //SSR -> INZ:1,INZ -> SSR:-1
@@ -408,6 +409,7 @@ $(function(){
   };
   updateArrival();
   $("#inputPanel").show();
+  //$("#inputPanel").hide();
   $("#applyBtn").on("click", function(){
     if (!$("#departureTime").val().trim()) {
         setNextDepartureTime();
