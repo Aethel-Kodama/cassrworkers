@@ -161,32 +161,38 @@ staname();
 const nnnnpreview = document.querySelector(".次々々々駅");
 const nnnpreview = document.querySelector(".次々々駅");
 const nnpreview = document.querySelector(".次々駅");
-function terminating(){ //終点到着時に次駅の表示を消す
+function terminatingDetail(){ // 次駅詳細系(staname()と同時=即時)
+    if (nnnsta) {
+        nnnsta.style.opacity =
+            ((nowsta + 2 > terminatesta && direction == 1) ||
+             (nowsta - 2 < terminatesta && direction == -1)) ? 0 : 1;
+    }
+    if (nnsta) {
+        nnsta.style.opacity =
+            ((nowsta + 1 > terminatesta && direction == 1) ||
+             (nowsta - 1 < terminatesta && direction == -1)) ? 0 : 1;
+    }
+}
+function terminatingPreview(){ // プレビュー系(nstaname()と同時=スクロール後)
     if (nnnnpreview) {
-        if (nowsta + 3 > terminatesta && direction == 1 || nowsta - 3 < terminatesta && direction == -1) {
-           nnnnpreview.style.opacity = 0;
-        } else {
-            nnnnpreview.style.opacity = 1;
-        }
+        nnnnpreview.style.opacity =
+            ((nowsta + 3 > terminatesta && direction == 1) ||
+             (nowsta - 3 < terminatesta && direction == -1)) ? 0 : 1;
     }
-    if (nnnsta&&nnnpreview) {
-        if (nowsta + 2 > terminatesta && direction == 1 || nowsta - 2 < terminatesta && direction == -1) {
-            nnnsta.style.opacity = 0;
-            nnnpreview.style.opacity = 0;
-        } else {
-            nnnsta.style.opacity = 1;
-            nnnpreview.style.opacity = 1;
-        }
+    if (nnnpreview) {
+        nnnpreview.style.opacity =
+            ((nowsta + 2 > terminatesta && direction == 1) ||
+             (nowsta - 2 < terminatesta && direction == -1)) ? 0 : 1;
     }
-    if (nnsta&&nnpreview) {
-        if (nowsta + 1 > terminatesta && direction == 1 || nowsta - 1 < terminatesta && direction == -1) {
-            nnsta.style.opacity = 0;
-            nnpreview.style.opacity = 0;
-        } else {
-            nnsta.style.opacity = 1;
-            nnpreview.style.opacity = 1;
-        }
+    if (nnpreview) {
+        nnpreview.style.opacity =
+            ((nowsta + 1 > terminatesta && direction == 1) ||
+             (nowsta - 1 < terminatesta && direction == -1)) ? 0 : 1;
     }
+}
+function terminating(){ // 既存の呼び出し箇所(同期する場所)はこのまま両方まとめて呼べばOK
+    terminatingDetail();
+    terminatingPreview();
 }
 
 terminating();
@@ -232,11 +238,13 @@ if (back) { // 戻るボタンを押したときの挙動まとめ
     back.addEventListener("click", function(){
         if (next.textContent!="次へ"){
             if (nowsta > startingsta && direction==1 || nowsta < startingsta && direction == -1) {
+                
                 nowsta = nowsta - 1 * direction;
                 nnowsta = nnowsta - 1*direction;
+                terminating();
                 staname();
                 nstaname();
-                terminating();                
+                                
                 meachDate();
             }
             if (next.textContent=="停車")
@@ -273,7 +281,7 @@ if (next) { //進むボタンを押したときの挙動まとめ
                 $(".次々駅詳細 *").fadeIn()
                 $(".次々々駅詳細 *").fadeIn()
                 unview();
-                terminating();
+                terminatingDetail();
                 next.textContent="停車";
                 staname();
                 $(".プレビュー,.標準時分")
@@ -283,6 +291,7 @@ if (next) { //進むボタンを押したときの挙動まとめ
                     .done(function(){
                     nnowsta = nnowsta + 1 * direction;
                     nstaname();
+                    terminatingPreview();
                     })
                 $("header .行先 strong").text(stalist[terminatesta])       
                 eachDate();        

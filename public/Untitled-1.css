@@ -5,10 +5,11 @@
    (実際にレイアウトを目視調整していたウィンドウサイズ)
    ========================================================== */
 
-input[type="time"]::-webkit-date-and-time-value {
-    padding-top: 10px;
-    text-align: left !important;
-}
+/* 以前は padding-top / text-align を指定していましたが、
+   iOS Safariで各セグメント(時・分・秒)のタップ判定が
+   表示位置とズレて「秒」が入力できなくなる不具合の原因になるため削除 */
+/*input[type="time"]::-webkit-date-and-time-value {
+}*/
 html,
 body{
     scrollbar-width:none;
@@ -398,3 +399,63 @@ div.時刻 p{
     cursor:pointer;
 }
 #applyBtn:hover{background:#333;}
+
+/* ---------- 時刻ホイールピッカー(時・分・秒) ---------- */
+.time-wheel{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    height:120px;          /* VISIBLE_H とJS側で合わせる */
+    background:#fafafa;
+    border:1px solid #ccc;
+    border-radius:6px;
+    overflow:hidden;
+    user-select:none;
+    -webkit-user-select:none;
+}
+.time-wheel-col{
+    height:120px;          /* VISIBLE_H とJS側で合わせる */
+    width:48px;
+    overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    padding:44px 0;        /* (120px - 32px) / 2、上下に余白を作って先頭/末尾も中央に来るように */
+    -webkit-overflow-scrolling:touch;
+}
+.time-wheel-col::-webkit-scrollbar{
+    display:none;
+}
+.time-wheel-item{
+    height:32px;           /* ITEM_H とJS側で合わせる */
+    line-height:32px;
+    text-align:center;
+    font-size:15px;
+    color:#aaa;
+    scroll-snap-align:center;
+    font-variant-numeric:tabular-nums;
+}
+.time-wheel-item.selected{
+    color:#111;
+    font-weight:bold;
+    font-size:18px;
+}
+.time-wheel-sep{
+    font-size:18px;
+    font-weight:bold;
+    color:#111;
+}
+.time-wheel-highlight{
+    position:absolute;
+    left:4px;
+    right:4px;
+    top:50%;
+    height:32px;
+    transform:translateY(-50%);
+    border-top:1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    pointer-events:none;
+    z-index:2;
+}
