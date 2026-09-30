@@ -225,7 +225,10 @@ function setNextDepartureTime(){
     const nextDeparture = currenttime
         ? new Date(currenttime.getTime() + 120000)
         : new Date(Date.now() + 120000);
-    departureTime2.value = formatTime(nextDeparture);
+    let nextDepartureH = String(nextDeparture.getHours()).padStart(2,"0");
+    let nextDepartureM = String(nextDeparture.getMinutes()).padStart(2,"0");
+    let nextDepartureS = String(nextDeparture.getSeconds()).padStart(2,"0");
+    setDepartureTimeWheel(nextDepartureH+":"+nextDepartureM+":"+nextDepartureS)
 }
 const back = document.querySelector(".戻る");
 const next = document.querySelector(".停車");
@@ -443,3 +446,121 @@ $(function(){
     view();
   });
 });
+    // #stage を画面サイズに合わせて拡大縮小して常に中央に表示する
+        (function () {
+            var DESIGN_W = 504;
+            var DESIGN_H = 600;
+            var stage = document.getElementById('stage');
+
+            function fitStage() {
+                var vw = window.innerWidth;
+                var vh = window.innerHeight;
+                // 画面に収まる最大倍率(はみ出さないよう小さい方に合わせる)
+                var scale = Math.min(vw / DESIGN_W, vh / DESIGN_H);
+                stage.style.transform = 'scale(' + scale + ')';
+            }
+
+            window.addEventListener('resize', fitStage);
+            window.addEventListener('orientationchange', fitStage);
+            fitStage();
+        })();
+function setDepartureTimeWheel(timeStr, opts) {
+                var animate = !(opts && opts.animate === false);
+                var parts = (timeStr || '').split(':');
+                var h = Math.max(0, Math.min(23, parseInt(parts[0], 10) || 0));
+                var m = Math.max(0, Math.min(59, parseInt(parts[1], 10) || 0));
+                var s = Math.max(0, Math.min(59, parseInt(parts[2], 10) || 0));
+                var values = [h, m, s];
+ 
+                columns.forEach(function (col, i) {
+                    col.value = values[i];
+                    col.el.scrollTo({
+                        top: col.value * ITEM_H,
+                        behavior: animate ? 'smooth' : 'auto'
+                    });
+                    updateSelected(col);
+                });
+                syncHiddenInput();
+            }
+        // 始発駅発車時刻:時・分・秒のホイールピッカー
+        // (iOS SafariのネイティブUIには秒がないため、独自実装に置き換え)
+        (function () {
+            var ITEM_H = 32;   // 1項目の高さ(px)。CSS側の .time-wheel-item と合わせる
+            var hiddenInput = document.getElementById('departureTime');
+
+            var columns = [
+                { el: document.getElementById('wheelHour'), max: 23, value: 11 },
+                { el: document.getElementById('wheelMinute'), max: 59, value: 45 },
+                { el: document.getElementById('wheelSecond'), max: 59, value: 14 }
+            ];
+            // 初期値(hidden inputのvalue="HH:MM:SS")を読み取る
+            (function readInitialValue() {
+                var parts = (hiddenInput.value || '').split(':');
+                if (parts.length >= 3) {
+                    columns[0].value = parseInt(parts[0], 10) || 0;
+                    columns[1].value = parseInt(parts[1], 10) || 0;
+                    columns[2].value = parseInt(parts[2], 10) || 0;
+                }
+            })();
+
+            function pad2(n) {
+                return (n < 10 ? '0' : '') + n;
+            }
+
+            function buildColumn(col) {
+                var el = col.el;
+                el.innerHTML = '';
+                for (var i = 0; i <= col.max; i++) {
+                    var item = document.createElement('div');
+                    item.className = 'time-wheel-item';
+                    item.textContent = pad2(i);
+                    item.dataset.value = i;
+                    el.appendChild(item);
+                }
+                el.scrollTop = col.value * ITEM_H;
+                updateSelected(col);
+            }
+
+            function updateSelected(col) {
+                var items = col.el.querySelectorAll('.time-wheel-item');
+                for (var i = 0; i < items.length; i++) {
+                    items[i].classList.toggle('selected', i === col.value);
+                }
+            }
+
+            function syncHiddenInput() {
+                var h = pad2(columns[0].value);
+                var m = pad2(columns[1].value);
+                var s = pad2(columns[2].value);
+                hiddenInput.value = h + ':' + m + ':' + s;
+                // jQueryやCAST.js側でchangeを監視している場合のために発火しておく
+                hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            columns.forEach(function (col) {
+                buildColumn(col);
+
+                var scrollTimer = null;
+                col.el.addEventListener('scroll', function () {
+                    if (scrollTimer) clearTimeout(scrollTimer);
+                    scrollTimer = setTimeout(function () {
+                        var index = Math.round(col.el.scrollTop / ITEM_H);
+                        index = Math.max(0, Math.min(col.max, index));
+                        // ぴったり揃うようスナップさせる
+                        col.el.scrollTo({ top: index * ITEM_H, behavior: 'smooth' });
+                        col.value = index;
+                        updateSelected(col);
+                        syncHiddenInput();
+                    }, 120); // スクロールが止まってから確定
+                }, { passive: true });
+
+                // タップで直接その項目を選ぶことも可能に
+                col.el.addEventListener('click', function (e) {
+                    var item = e.target.closest('.time-wheel-item');
+                    if (!item) return;
+                    var index = parseInt(item.dataset.value, 10);
+                    col.el.scrollTo({ top: index * ITEM_H, behavior: 'smooth' });
+                });
+            });
+            syncHiddenInput();
+        })();
