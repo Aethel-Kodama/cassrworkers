@@ -200,22 +200,18 @@ aside{
 }
 .停通{
     position: relative;
-    top: -38px;
+    top: -32px;
     left: 120px;
-    width: 18.648px; /* 3.7vw → 504px基準 */
-    background-color: #224ed1;
-    padding: 2px;
-    border-radius: 2px;
+    width: 19px; /* 3.7vw → 504px基準 */
     display: none;
 }
 .次駅詳細 .停通{
-    position: static;
+    position: relative;
     margin:0;
-    top:0;
+    top:3px;
     left:0;
-    font-size: 20px;
     width: 23.184px; /* 4.6vw → 504px基準 */
-    height: 30px;
+    height: 23.184px;
     display: none;
 }
 .次駅停車枠{

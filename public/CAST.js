@@ -11,9 +11,9 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
  
 //定義
     
-    let direction = -1; //SSR -> INZ:1,INZ -> SSR:-1
-    let terminatesta = 0;
-    let startingsta = 2;
+    let direction = 1; //SSR -> INZ:1,INZ -> SSR:-1
+    let terminatesta = 3;
+    let startingsta = 0;
     let nowsta = startingsta;
     let nnowsta = nowsta;
     const kudaritakemin = [1,1,1,1,1,1,1,1,2,8,8,8]//index0->SSR-NSR
@@ -425,7 +425,7 @@ $(function(){
   };
   updateArrival();
   $("#inputPanel").show();
-  //$("#inputPanel").hide();
+  $("#inputPanel").hide();
   $("#applyBtn").on("click", function(){
     if (!$("#departureTime").val().trim()) {
         setNextDepartureTime();
