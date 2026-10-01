@@ -36,7 +36,7 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
     let dm;
     let ds;
     let animating = false;
-
+    let isplayed = false;
 function delay(dat){
     const delays = document.querySelector(".発車まで");if (!delays) return;
     if (currenttime){
@@ -57,10 +57,14 @@ function delay(dat){
             else{
                 delays.textContent="定刻"
             }
-            if (Number(ds)===30){
+            
+            if (Number(ds)===30&&isplayed===false){
+                isplayed=true;
                 soondep.currentTime=0;
-                soondep.play();
+                soondep.play(); 
             }
+            else if (Number(ds)!==30){
+                isplayed=false;}
         }
         else{
             delayMs = (currenttime-dat)*-1;
@@ -82,6 +86,7 @@ function delay(dat){
         }        
     }
 }
+
 function view(){//停車中の表示
     $(".次駅発着時刻").addClass("停車中");
     $(".発車まで").css("display","inline")
