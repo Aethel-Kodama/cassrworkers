@@ -262,7 +262,7 @@ function setNextDepartureTime(){
 const stoporpass = document.querySelector(".次駅詳細 .停通");
 const stoporpass2 = document.querySelector(".次々駅詳細 .停通");
 const stoporpass3 = document.querySelector(".次々々駅詳細 .停通");
-let pass = true;
+let pass = false;
 function stoporpasses(type,nowsta){
     if (type === "快速" && !(rapidstopsta.includes(nowsta))||type === "準急" && !(JUNstopsta.includes(nowsta))||type === "急行" && !(expressstopsta.includes(nowsta))||type === "快速特急" && !(Rapexpstopsta.includes(nowsta))||type === "特急" && !(Limexpstopsta.includes(nowsta))){
         stoporpass.src = 'passsign.png';
