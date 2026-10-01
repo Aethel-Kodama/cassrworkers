@@ -27,6 +27,8 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
     let dh;
     let dm;
     let ds;
+    let animating = false;
+
 function delay(dat){
     const delays = document.querySelector(".発車まで");if (!delays) return;
     if (currenttime){
@@ -237,6 +239,7 @@ if(terminate){terminate.textContent=stalist[terminatesta]}
 nstaname();
 if (back) { // 戻るボタンを押したときの挙動まとめ
     back.addEventListener("click", function(){
+        if (animating) return;
         if (next.textContent!="次へ"){
             if (nowsta > startingsta && direction==1 || nowsta < startingsta && direction == -1) {
                 
@@ -262,6 +265,7 @@ if (back) { // 戻るボタンを押したときの挙動まとめ
  
 if (next) { //進むボタンを押したときの挙動まとめ
     next.addEventListener("click", function(){
+        if (animating) return;
         if (nowsta == terminatesta&&next.textContent=="停車"){
             setNextDepartureTime();
             updateArrival();
@@ -285,12 +289,14 @@ if (next) { //進むボタンを押したときの挙動まとめ
                 terminatingDetail();
                 next.textContent="停車";
                 staname();
+                animating = true;
                 $(".プレビュー,.標準時分")
                     .animate({top:"+=69px"},700)
                     .animate({top:"-=69px"},0)
                     .promise()
                     .done(function(){
-                    nnowsta = nnowsta + 1 * direction;
+                        animating = false;
+                        nnowsta = nnowsta + 1 * direction;
                     nstaname();
                     terminatingPreview();
                     })
