@@ -21,6 +21,14 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
     const noboritakemin = [2 ,1 ,2 ,1 ,1 ,1 ,1 ,2,1 ,3 ,3 ,3]
     const noboritakesec = [15,25,10,55,10,10,10,0,40,34,34,34]
     let stoptime=[15,30,15,30,15, 15,30,15,30,15 ,15,30]//index0 = NSR,index13 = INZonsen;
+    const localstopsta = [0,1,2,3,4,5,6,7,8,9,10,11,12];
+    const JUNstopsta =   [0,  2,  4,5,  7,8,9,10,11,12];
+    const expressstopsta=[0,  2,  4,    7,  9,10,11,12];
+    const Rapexpstopsta =[0,      4,    7,  9,      12];
+    const Limexpstopsta =[0,      4,        9,      12];
+    const rapidstopsta = [0,  2,  4,    7,8,9,10,11,12];
+    let soondep = new Audio("soondep.m4a");
+    let type;
     let dept;
     let currenttime;
     let delayMs;
@@ -48,6 +56,10 @@ function delay(dat){
             }
             else{
                 delays.textContent="定刻"
+            }
+            if (Number(ds)===30){
+                soondep.currentTime=0;
+                soondep.play();
             }
         }
         else{
@@ -202,14 +214,24 @@ function stop(){
     currenttime.setSeconds(currenttime.getSeconds()+stoptime[nowsta-1*direction])
     }
     $(".次駅停車時分").text(String(currenttime.getHours()).padStart(2,"\u2007")+":"+String(currenttime.getMinutes()).padStart(2, "0"))
-    $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0")+"\u2007発")
+    if(pass===false){
+        $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0")+"\u2007発")
+    }
+    else if(pass===true){
+        $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0")+"\u2007通")
+    }
 }
 function mstop(){
     if (nowsta!=startingsta){
     currenttime.setSeconds(currenttime.getSeconds()-stoptime[nowsta-1*direction])
     }
     $(".次駅停車時分").text(String(currenttime.getHours()).padStart(2,"\u2007")+":"+String(currenttime.getMinutes()).padStart(2, "0"))
-    $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0")+"\u2007着")
+    if(pass===false){
+        $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0")+"\u2007着")
+    }
+    else if(pass===true){
+        $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0")+"\u2007通")
+    }
 }
 function formatTime(date){
     return [
@@ -231,6 +253,32 @@ function setNextDepartureTime(){
     let nextDepartureM = String(nextDeparture.getMinutes()).padStart(2,"0");
     let nextDepartureS = String(nextDeparture.getSeconds()).padStart(2,"0");
     setDepartureTimeWheel(nextDepartureH+":"+nextDepartureM+":"+nextDepartureS)
+}
+const stoporpass = document.querySelector(".次駅詳細 .停通");
+const stoporpass2 = document.querySelector(".次々駅詳細 .停通");
+const stoporpass3 = document.querySelector(".次々々駅詳細 .停通");
+let pass = true;
+function stoporpasses(type,nowsta){
+    if (type === "快速" && !(rapidstopsta.includes(nowsta))||type === "準急" && !(JUNstopsta.includes(nowsta))||type === "急行" && !(expressstopsta.includes(nowsta))||type === "快速特急" && !(Rapexpstopsta.includes(nowsta))||type === "特急" && !(Limexpstopsta.includes(nowsta))){
+        stoporpass.src = 'passsign.png';
+        pass=true;
+    }
+    else{
+        stoporpass.src = 'stopsign.png';
+        pass=false;
+    }
+    if (type === "快速" && !(rapidstopsta.includes(nowsta+1*direction))||type === "準急" && !(JUNstopsta.includes(nowsta+1*direction))||type === "急行" && !(expressstopsta.includes(nowsta+1*direction))||type === "快速特急" && !(Rapexpstopsta.includes(nowsta+1*direction))||type === "特急" && !(Limexpstopsta.includes(nowsta+1*direction))){
+        stoporpass2.src = 'passsign.png';   
+    }
+    else{
+        stoporpass2.src = 'stopsign.png';
+    } 
+    if (type === "快速" && !(rapidstopsta.includes(nowsta+2*direction))||type === "準急" && !(JUNstopsta.includes(nowsta+2*direction))||type === "急行" && !(expressstopsta.includes(nowsta+2*direction))||type === "快速特急" && !(Rapexpstopsta.includes(nowsta+2*direction))||type === "特急" && !(Limexpstopsta.includes(nowsta+2*direction))){
+        stoporpass3.src = 'passsign.png';
+    }
+    else{
+        stoporpass3.src = 'stopsign.png';
+    }
 }
 const back = document.querySelector(".戻る");
 const next = document.querySelector(".停車");
@@ -271,7 +319,7 @@ if (next) { //進むボタンを押したときの挙動まとめ
             updateArrival();
             $("#inputPanel").show();
             $("#startingstation").val(nowsta);
- 
+            
         }
         if (nowsta != terminatesta) {
             if (next.textContent === "次へ"){
@@ -282,12 +330,15 @@ if (next) { //進むボタンを押したときの挙動まとめ
                 
                 $(".次々々駅詳細 *").hide()
                 nowsta=nowsta+1*direction;
+                stoporpasses(type,nowsta);
                 $(".次駅詳細 *").not(".発車まで").fadeIn()
                 $(".次々駅詳細 *").fadeIn()
                 $(".次々々駅詳細 *").fadeIn()
-                unview();
+                if (pass === false) {
+                    unview();
+                    next.textContent="停車";
+                }
                 terminatingDetail();
-                next.textContent="停車";
                 staname();
                 animating = true;
                 $(".プレビュー,.標準時分")
@@ -301,7 +352,8 @@ if (next) { //進むボタンを押したときの挙動まとめ
                     terminatingPreview();
                     })
                 $("header .行先 strong").text(stalist[terminatesta])       
-                eachDate();        
+                eachDate();
+                if (pass === true) {stop()};        
             }
             else {
                 next.textContent = "次へ";
@@ -341,6 +393,7 @@ function startDate(deptime){//Date型に変換
     return starttime;
 }
 function eachDate(){
+    
     if (direction===-1&&startingsta!=nowsta){//上り
         currenttime.setSeconds(currenttime.getSeconds()+noboritakesec[nowsta])
         currenttime.setMinutes(currenttime.getMinutes()+noboritakemin[nowsta])
@@ -350,7 +403,12 @@ function eachDate(){
         currenttime.setMinutes(currenttime.getMinutes()+kudaritakemin[nowsta-1])
     }
     $(".次駅停車時分").text(String(currenttime.getHours()).padStart(2,"\u2007")+":"+String(currenttime.getMinutes()).padStart(2, "0"))
-    $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0")+"\u2007着")
+    if(pass===false){
+        $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0")+"\u2007着")
+    }
+    else if(pass===true){
+        $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0")+"\u2007通")
+    }
 }
 function meachDate(){
     if (direction==-1){//上り
@@ -362,7 +420,12 @@ function meachDate(){
         currenttime.setMinutes(currenttime.getMinutes()-kudaritakemin[nowsta])
     }
     $(".次駅停車時分").text(String(currenttime.getHours()).padStart(2,"\u2007")+":"+String(currenttime.getMinutes()).padStart(2, "0"))
-    $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0"))
+    if(pass===false){
+        $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0"))
+    }
+    else if(pass===true){
+        $(".次駅停車秒").text(String(currenttime.getSeconds()).padStart(2, "0")+"\u2007通")
+    }
 }
  
 function terminatearr(starttime,startsta,termsta){
@@ -425,7 +488,7 @@ $(function(){
   };
   updateArrival();
   $("#inputPanel").show();
-  $("#inputPanel").hide();
+  //$("#inputPanel").hide();
   $("#applyBtn").on("click", function(){
     if (!$("#departureTime").val().trim()) {
         setNextDepartureTime();
@@ -436,6 +499,7 @@ $(function(){
     trainData.departureTime   = $("#departureTime").val();
     terminatesta = Number(trainData.destination);
     startingsta=Number(trainData.startingstation);
+    type=trainData.type;
     dept=trainData.departureTime;
     nowsta = startingsta;
     currenttime=startDate(dept)
