@@ -37,13 +37,28 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
     let ds;
     let animating = false;
         let isplayed = false;
-document.addEventListener('touchstart', function unlock() {
+soondep.preload = "auto";
+
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  soondep.muted = true;
   soondep.play().then(() => {
     soondep.pause();
     soondep.currentTime = 0;
-  }).catch(console.error);
-  document.removeEventListener('touchstart', unlock);
-}, { once: true });
+    soondep.muted = false;
+    audioUnlocked = true;
+    ["click", "touchend", "pointerup"].forEach(ev =>
+      document.removeEventListener(ev, unlockAudio, true)
+    );
+  }).catch(e => {
+    soondep.muted = false;
+    console.error("unlock失敗", e); // 失敗したら次のタップで再挑戦
+  });
+}
+["click", "touchend", "pointerup"].forEach(ev =>
+  document.addEventListener(ev, unlockAudio, true)
+);
 
 function delay(dat){
     const delays = document.querySelector(".発車まで");if (!delays) return;
