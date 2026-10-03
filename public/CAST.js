@@ -36,7 +36,15 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
     let dm;
     let ds;
     let animating = false;
-    let isplayed = false;
+        let isplayed = false;
+document.addEventListener('touchstart', function unlock() {
+  soondep.play().then(() => {
+    soondep.pause();
+    soondep.currentTime = 0;
+  }).catch(console.error);
+  document.removeEventListener('touchstart', unlock);
+}, { once: true });
+
 function delay(dat){
     const delays = document.querySelector(".発車まで");if (!delays) return;
     if (currenttime){
