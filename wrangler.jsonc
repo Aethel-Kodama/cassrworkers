@@ -20,7 +20,13 @@
 			"binding": "SESSIONS",
 			"id": "02a7a29226574ec0bc44556cfd886794"
 		}
-	]
+	],
+	"d1_databases": [
+    {
+      "binding": "DB",
+      "database_id": "b2a9b80f-6709-45d3-a9ae-234b24cd739f"
+    }
+  	],
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
