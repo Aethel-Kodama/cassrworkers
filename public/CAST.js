@@ -27,7 +27,7 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
     const Rapexpstopsta =[0,      4,    7,  9,      12];
     const Limexpstopsta =[0,      4,        9,      12];
     const rapidstopsta = [0,  2,  4,    7,8,9,10,11,12];
-    let soondep = new Audio("soondep.m4a");
+    //let soondep = new Audio("soondep.m4a");
     let type;
     let dept;
     let currenttime;
@@ -37,29 +37,49 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
     let ds;
     let animating = false;
         let isplayed = false;
-soondep.preload = "auto";
+// 画面上のデバッグ表示(確認が済んだら消してOK)
+function dbg(msg){
+  let d = document.getElementById("dbg");
+  if(!d){
+    d = document.createElement("div");
+    d.id = "dbg";
+    d.style.cssText = "position:fixed;top:0;left:0;z-index:99999;background:rgba(0,0,0,.8);color:#0f0;font:12px monospace;padding:4px;max-width:100%;pointer-events:none;white-space:pre-wrap";
+    document.body.appendChild(d);
+  }
+  d.textContent += msg + "\n";
+}
 
-let audioUnlocked = false;
-function unlockAudio() {
-  if (audioUnlocked) return;
-  soondep.muted = true;
-  soondep.play().then(() => {
-    soondep.pause();
-    soondep.currentTime = 0;
-    soondep.muted = false;
-    audioUnlocked = true;
-    ["click", "touchend", "pointerup"].forEach(ev =>
-      document.removeEventListener(ev, unlockAudio, true)
-    );
-  }).catch(e => {
-    soondep.muted = false;
-    console.error("unlock失敗", e); // 失敗したら次のタップで再挑戦
-  });
+const AC = window.AudioContext || window.webkitAudioContext;
+const actx = new AC();
+let soondepBuf = null;
+
+fetch("soondep.m4a")
+  .then(r => { dbg("fetch:" + r.status + " " + r.headers.get("content-type")); return r.arrayBuffer(); })
+  .then(b => new Promise((res, rej) => actx.decodeAudioData(b, res, rej)))
+  .then(buf => { soondepBuf = buf; dbg("音声読み込みOK"); })
+  .catch(e => dbg("読み込み失敗: " + e));
+
+function unlockAudio(){
+  if (actx.state !== "running") {
+    actx.resume().then(() => dbg("ctx:" + actx.state)).catch(e => dbg("resume失敗: " + e));
+  }
+  const s = actx.createBufferSource();
+  s.buffer = actx.createBuffer(1, 1, 22050);
+  s.connect(actx.destination);
+  s.start(0);
 }
 ["click", "touchend", "pointerup"].forEach(ev =>
   document.addEventListener(ev, unlockAudio, true)
 );
 
+function playSoondep(){
+  if (!soondepBuf) { dbg("バッファ未読込"); return; }
+  if (actx.state !== "running") dbg("ctx:" + actx.state);
+  const s = actx.createBufferSource();
+  s.buffer = soondepBuf;
+  s.connect(actx.destination);
+  s.start(0);
+}
 function delay(dat){
     const delays = document.querySelector(".発車まで");if (!delays) return;
     if (currenttime){
@@ -80,11 +100,11 @@ function delay(dat){
             else{
                 delays.textContent="定刻"
             }
+            //soondep.currentTime=0;
             if (Number(ds)===30&&isplayed===false){
-                isplayed=true;
-                soondep.currentTime=0;
-                soondep.play(); 
-            }
+    isplayed=true;
+    playSoondep();
+}
             if (Number(ds)!==30&&isplayed===true){
                 isplayed=false;
             }
