@@ -39,14 +39,15 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
         let isplayed = false;
 // 画面上のデバッグ表示(確認が済んだら消してOK)
 function dbg(msg){
-  let d = document.getElementById("dbg");
-  if(!d){
-    d = document.createElement("div");
-    d.id = "dbg";
-    d.style.cssText = "position:fixed;top:0;left:0;z-index:99999;background:rgba(0,0,0,.8);color:#0f0;font:12px monospace;padding:4px;max-width:100%;pointer-events:none;white-space:pre-wrap";
-    document.body.appendChild(d);
-  }
-  d.textContent += msg + "\n";
+//  let d = document.getElementById("dbg");
+//  if(!d){
+//    d = document.createElement("div");
+//    d.id = "dbg";
+//  }
+//  d.style.cssText = "position:fixed;top:0;left:0;z-index:99999;background:rgba(0,0,0,.8);color:#0f0;font:12px monospace;padding:4px;max-width:100%;pointer-events:none;white-space:pre-wrap";
+//  document.body.appendChild(d);
+// }
+// d.textContent += msg + "\n";
 }
 
 const AC = window.AudioContext || window.webkitAudioContext;
