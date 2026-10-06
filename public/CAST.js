@@ -16,10 +16,18 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
     let startingsta = 2;
     let nowsta = startingsta;
     let nnowsta = nowsta;
-    const kudaritakemin = [1,1,1,1,1,1,1,1,2,8,8,8]//index0->SSR-NSR
-    const kudaritakesec = [45,55,55,55,10,15,25,55,10,10,10,10]
-    const noboritakemin = [2 ,1 ,2 ,1 ,1 ,1 ,1 ,2,1 ,3 ,3 ,3]
-    const noboritakesec = [15,25,10,55,10,10,10,0,40,34,34,34]
+    let kudaritakemin =      [1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,2 ,8 ,8 ,8 ]//index0->SSR-NSR
+    let kudaritakesec =      [45,55,55,55,10,15,25,55,10,10,10,10]
+    let noboritakemin =      [2 ,1 ,2 ,1 ,1 ,1 ,1 ,2 ,1 ,3 ,3 ,3 ]
+    let noboritakesec =      [15,25,10,55,10,10,10, 0,40,34,34,34]
+    const rapidkudaritakemin = [1 ,1 ,1 ,1 ,0 ,0 ,0 ,1 ,1 ,8 ,8 ,8 ]//index0->SSR-NSR
+    const rapidkudaritakesec = [ 5,15, 0,15,45,30,45,30,25,10,10,10]
+    const rapidnoboritakemin = [1 ,1 ,0 ,0 ,1 ,0 ,1 ,0 ,1 ,3, 3 ,3 ]
+    const rapidnoboritakesec = [30,50,40,30, 0,55,15,50,10,34,34,34]
+    const ltdexpkudaritakemin= [1 ,0 ,0 ,1 ,0 ,0 ,0 ,1 ,1 ,8 ,8 ,8 ]
+    const ltdexpkudaritakesec= [ 5,30,45,20,35,40,30,20,10,10,10,10]
+    const ltdexpnoboritakemin= [1 ,0 ,0 ,0 ,0 ,1 ,0 ,0 ,1 ,3 ,3 ,3 ]
+    const ltdexpnoboritakesec= [ 0,45,30,25,50, 0,50,40,10,34,34,34]
     let stoptime=[15,30,15,30,15, 15,30,15,30,15 ,15,30]//index0 = NSR,index13 = INZonsen;
     const localstopsta = [0,1,2,3,4,5,6,7,8,9,10,11,12];
     const JUNstopsta =   [0,  2,  4,5,  7,8,9,10,11,12];
@@ -36,7 +44,31 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
     let dm;
     let ds;
     let animating = false;
-        let isplayed = false;
+    let isplayed = false;
+    const back = document.querySelector(".戻る");
+    const next = document.querySelector(".停車");
+    function changetakemin(type){
+        console.log("changetakemin:", JSON.stringify(type));
+        switch(type){
+        case "快速":
+            noboritakemin = rapidnoboritakemin;
+            kudaritakemin = rapidkudaritakemin;
+            noboritakesec = rapidnoboritakesec;
+            kudaritakesec = rapidkudaritakesec;
+            break;
+        case "特急":
+            noboritakemin = ltdexpnoboritakemin;
+            kudaritakemin = ltdexpkudaritakemin;
+            noboritakesec = ltdexpnoboritakesec;
+            kudaritakesec = ltdexpkudaritakesec;
+            break;
+        default:
+            noboritakemin =      [2 ,1 ,2 ,1 ,1 ,1 ,1 ,2 ,1 ,3 ,3 ,3 ];
+            kudaritakemin =      [1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,2 ,8 ,8 ,8 ];
+            noboritakesec =      [15,25,10,55,10,10,10, 0,40,34,34,34];
+            kudaritakesec =      [45,55,55,55,10,15,25,55,10,10,10,10];
+        }
+}
 // 画面上のデバッグ表示(確認が済んだら消してOK)
 function dbg(msg){
 //  let d = document.getElementById("dbg");
@@ -102,11 +134,14 @@ function delay(dat){
                 delays.textContent="定刻"
             }
             //soondep.currentTime=0;
-            if (Number(ds)===30&&isplayed===false){
-    isplayed=true;
-    playSoondep();
-}
-            if (Number(ds)!==30&&isplayed===true){
+            if (Number(ds)===30&&Number(dh)===0&&Number(dm)===0&&pass===false&&next.textContent==="次へ"&&isplayed===false){
+                
+                isplayed=true;
+                playSoondep();
+                
+}           
+            
+            if ((Number(ds)>30||Number(dm)!==0||Number(dh)!==0)&&isplayed===true){
                 isplayed=false;
             }
         }
@@ -329,10 +364,10 @@ function stoporpasses(type,nowsta){
         stoporpass3.src = 'stopsign.png';
     }
 }
-const back = document.querySelector(".戻る");
-const next = document.querySelector(".停車");
+
 const terminate = document.querySelector(".行先 strong");
 if(terminate){terminate.textContent=stalist[terminatesta]}
+changetakemin(type);
 nstaname();
 if (back) { // 戻るボタンを押したときの挙動まとめ
     back.addEventListener("click", function(){
@@ -342,6 +377,7 @@ if (back) { // 戻るボタンを押したときの挙動まとめ
                 
                 nowsta = nowsta - 1 * direction;
                 nnowsta = nnowsta - 1*direction;
+                changetakemin(type);
                 terminating();
                 staname();
                 nstaname();
@@ -368,6 +404,7 @@ if (next) { //進むボタンを押したときの挙動まとめ
             updateArrival();
             $("#inputPanel").show();
             $("#startingstation").val(nowsta);
+            $("#startingstation").val(nnowsta);
             
         }
         if (nowsta != terminatesta) {
@@ -379,6 +416,7 @@ if (next) { //進むボタンを押したときの挙動まとめ
                 
                 $(".次々々駅詳細 *").hide()
                 nowsta=nowsta+1*direction;
+                changetakemin(type);
                 stoporpasses(type,nowsta);
                 $(".次駅詳細 *").not(".発車まで").fadeIn()
                 $(".次々駅詳細 *").fadeIn()
@@ -402,7 +440,7 @@ if (next) { //進むボタンを押したときの挙動まとめ
                     })
                 $("header .行先 strong").text(stalist[terminatesta])       
                 eachDate();
-                if (pass === true) {stop()};        
+                //if (pass === false) {stop()};        
             }
             else {
                 next.textContent = "次へ";
@@ -508,6 +546,7 @@ function terminatearr(starttime,startsta,termsta){
         return hh+":"+mm+":"+ss;
 }
 function updateArrival(){
+    changetakemin($("#trainType").val());
     $(".laststoparr").text(
         terminatearr($("#departureTime").val(), Number($("#startingstation").val()), Number($("#destination").val()))
     );
@@ -528,6 +567,7 @@ $(function(){
     $startingstation.append($("<option>").val(stalist.indexOf(name)).text(name));
   });
   $("#startingstation").val(nowsta);
+  $("#startingstation").val(nnowsta);
   // 列車情報を格納する変数
   var trainData = {
     type: "",
@@ -551,15 +591,19 @@ $(function(){
     type=trainData.type;
     dept=trainData.departureTime;
     nowsta = startingsta;
+    nnowsta = startingsta;
     currenttime=startDate(dept)
     if(terminatesta>nowsta){direction=1}
     else{direction=-1}
     updateRestriction();
-    staname();
+    changetakemin(type);
     nstaname();
+    stoporpasses(type,nowsta);
+    staname();
     terminating();
     $(".行先 strong").text(stalist[terminatesta])
-    $("#inputPanel").hide()
+    
+    $("#inputPanel").hide();
     eachDate();
     stop();
     view();
