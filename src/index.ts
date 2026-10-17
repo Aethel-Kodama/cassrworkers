@@ -273,6 +273,22 @@ if (ack && request.method === "POST") {
     "INSERT OR IGNORE INTO notice_acks (notice_id, discord_id, acked_at) VALUES (?, ?, ?)"
   ).bind(ack[1], session.id, new Date().toISOString()).run();
   return json({ ok: true });
+}// 通告ごとの確認状況(送信役のみ)
+const acks = path.match(/^\/api\/notices\/([\w-]+)\/acks$/);
+if (acks && request.method === "GET") {
+  if (!canSend(session)) return json({ error: "権限がありません" }, 403);
+  const { results } = await env.DB.prepare(
+    `SELECT u.discord_id, u.username, a.acked_at
+     FROM users u
+     LEFT JOIN notice_acks a ON a.notice_id = ?1 AND a.discord_id = u.discord_id
+     WHERE (
+       EXISTS (SELECT 1 FROM notice_recipients r WHERE r.notice_id = ?1 AND r.discord_id = u.discord_id)
+       OR (NOT EXISTS (SELECT 1 FROM notice_recipients r WHERE r.notice_id = ?1) AND u.is_driver = 1)
+       OR a.acked_at IS NOT NULL
+     )
+     ORDER BY a.acked_at IS NULL, a.acked_at, u.username`
+  ).bind(acks[1]).all();
+  return json(results);
 }
       return json({ error: "Not found" }, 404);
     }

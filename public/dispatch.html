@@ -47,6 +47,11 @@ dialog dl{margin:0 0 16px;display:grid;grid-template-columns:7em 1fr;gap:4px 8px
 dialog dt{color:var(--sub)}dialog dd{margin:0;word-break:break-all}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:no-preference){.types button{transition:background .12s}}
+#list .body{flex:1;min-width:0}
+#list .det{margin-top:8px;font-size:.9rem}
+#list .det p{margin:2px 0}
+#list .det .done{color:#1d6b3a}
+#list .det .wait{color:var(--c-susp)}
 </style>
 </head>
 <body>
@@ -174,12 +179,30 @@ async function loadList(){
     const t=TYPES[r.type]||{label:r.type,c:"--line"};
     const st=r.status==="cancelled"?"取り消し済み":(r.valid_until&&r.valid_until<=now)?"期限切れ":"有効";
     const live=st==="有効";
-    return `<li class="${live?"":"off"}" style="--c:var(${t.c})"><div><b>${esc(t.label)}</b> ${esc((r.line||"")+" "+(r.from_station||"")+(r.to_station?" 〜 "+r.to_station:""))}
-      
-      <div class="meta">${st} / ${r.recipients.length?r.recipients.length+"人宛て":"全員宛て"} / 確認 ${r.ack_count}/${r.recipients.length||users.length} / ${new Date(r.issued_at).toLocaleString("ja-JP")}</div></div>${live?`<button class="btn small danger" data-id="${esc(r.id)}">取り消し</button>`:""}</li>`}).join("")
+    const total=r.recipients.length||users.length;
+    return `<li class="${live?"":"off"}" style="--c:var(${t.c})"><div class="body"><b>${esc(t.label)}</b> ${esc((r.line||"")+" "+(r.from_station||"")+(r.to_station?" 〜 "+r.to_station:""))}
+      <div class="meta">${st} / ${r.recipients.length?r.recipients.length+"人宛て":"全員宛て"} / ${new Date(r.issued_at).toLocaleString("ja-JP")}</div>
+      <button class="btn small" data-ack="${esc(r.id)}">確認 ${r.ack_count}/${total}</button>
+      <div class="det" hidden></div></div>
+      ${live?`<button class="btn small danger" data-id="${esc(r.id)}">取り消し</button>`:""}</li>`}).join("")
     :'<li class="empty">送信した通告はまだありません。上のフォームから送信できます。</li>';
 }
 $("#list").addEventListener("click",async e=>{
+  const a=e.target.closest("button[data-ack]");
+  if(a){
+    const det=a.parentNode.querySelector(".det");
+    if(!det.hidden){det.hidden=true;return}
+    try{
+      const rows=await api("/api/notices/"+a.dataset.ack+"/acks");
+      const done=rows.filter(x=>x.acked_at), wait=rows.filter(x=>!x.acked_at);
+      const hm=s=>new Date(s).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});
+      det.innerHTML=
+        `<p class="done"><b>確認済み ${done.length}人</b></p><p>${done.map(x=>esc(x.username)+"("+hm(x.acked_at)+")").join("、")||"なし"}</p>`+
+        `<p class="wait"><b>未確認 ${wait.length}人</b></p><p>${wait.map(x=>esc(x.username)).join("、")||"なし"}</p>`;
+      det.hidden=false;
+    }catch(err){toast(err.message,"err")}
+    return;
+  }
   const b=e.target.closest("button[data-id]"); if(!b||!confirm("この通告を取り消しますか?")) return;
   try{await api("/api/notices/"+b.dataset.id,{method:"PATCH"});toast("取り消しました","ok");loadList()}catch(err){toast(err.message,"err")}
 });
