@@ -737,3 +737,96 @@ $(function(){
             });
             syncHiddenInput();
         })();
+// ===== 運転通告の受信と表示 =====
+let allNotices = null;   // 最後に取得した通告(取得できていなければnull)
+let shownKey = "";       // 前回の描画内容(変化がなければ再描画しない)
+
+// 通告欄の高さを、中身が空になっても保つ
+const menuReady = document.fonts.ready.then(() => {
+    const menu = document.querySelector(".menu");
+    if (menu) menu.style.minHeight = menu.offsetHeight + "px";
+});
+
+const noticeSection = n => n.from_station + (n.to_station ? "〜" + n.to_station : "");
+
+// 種別ごとの表示内容:[種別名, 大きく出す文字, 小さく出す文字]
+const NOTICE_VIEW = {
+    track_change:      n => ["着発線変更",   n.from_station,   n.payload.track],
+    speed_restriction: n => ["徐行",         noticeSection(n), n.payload.speed + " km/h"],
+    suspension:        n => ["運転見合わせ", noticeSection(n), n.payload.reason],
+    inhibit:           n => ["抑止",         noticeSection(n), n.payload.reason],
+    construction:      n => ["工事",         noticeSection(n), n.payload.description]
+};
+
+// 通告が、選んだ運転区間に含まれるか
+// 区間の通告は、区間が実際に重なるときだけ(端の駅で接するだけでは含めない)
+function noticeApplies(n){
+    const a = stalist.indexOf(n.from_station);
+    if (a < 0) return true;                       // 駅名が一覧にないときは見逃さず表示する
+    const b = n.to_station ? stalist.indexOf(n.to_station) : a;
+    if (b < 0) return true;
+    const lo = Math.min(startingsta, terminatesta), hi = Math.max(startingsta, terminatesta);
+    const nlo = Math.min(a, b), nhi = Math.max(a, b);
+    return a === b ? (nlo >= lo && nlo <= hi) : (Math.max(nlo, lo) < Math.min(nhi, hi));
+}
+
+
+
+// 通告をタップして確認済みにする
+async function ackNotice(n){
+    if (n.acked) return;
+    n.acked = 1; shownKey = ""; showNotices();    // 先に画面へ反映する
+    try {
+        const r = await fetch(`/api/notices/${n.id}/ack`, { method: "POST" });
+        if (!r.ok) throw new Error();
+    } catch (e) {
+        n.acked = 0; shownKey = ""; showNotices(); // 失敗したら未確認に戻す
+    }
+}
+
+function showNotices(){
+    const menu = document.querySelector(".menu");
+    if (!menu || allNotices === null) return;
+
+    const routeSet = !$("#inputPanel").is(":visible");   // 行路を選ぶ前は全件表示
+    const list = allNotices.filter(n => !routeSet || noticeApplies(n));
+
+    const key = [routeSet, startingsta, terminatesta, JSON.stringify(list.map(n => [n.id, n.acked]))].join("|");
+    if (key === shownKey) return;
+    shownKey = key;
+
+    menu.textContent = "";   // HTMLに書いてあるサンプルの通告もここで消える
+    list.forEach(n => {
+        const view = NOTICE_VIEW[n.type];
+        if (!view) return;
+        const [label, main, sub] = view(n);
+        const card = document.createElement("div");
+        card.className = "通告1";
+        [["p", n.acked ? "通告" : "通告 要確認"], ["br"], ["p", label], ["p", "\u3000"], ["h4", main], ["h5", sub]].forEach(([tag, text]) => {
+            const el = document.createElement(tag);
+            if (text != null) el.textContent = text;   // textContentなので、入力された文字がHTMLとして解釈されない
+            card.appendChild(el);
+        });
+        if (!n.acked) {
+            card.style.outline = "3px solid #ffb300";  // 未確認は枠で目立たせる
+            card.style.cursor = "pointer";
+            card.addEventListener("click", () => ackNotice(n));
+        }
+        menu.appendChild(card);
+    });
+
+    
+}
+
+async function pollNotices(){
+    await menuReady;
+    try {
+        const r = await fetch("/api/notices");
+        if (!r.ok) return;           // 未ログインや通信エラーのときは表示を変えない
+        allNotices = await r.json();
+        showNotices();
+    } catch (e) {}
+}
+pollNotices();
+setInterval(pollNotices, 5000);                        // 5秒おきに取得
+$(function(){ $("#applyBtn").on("click", showNotices); });   // 行路を決定した時点で絞り込み直す

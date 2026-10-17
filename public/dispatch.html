@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>運転通告の送信</title>
+<style>
+:root{--bg:#eceff1;--panel:#fff;--ink:#1c2630;--sub:#5b6875;--line:#c9d1d8;--navy:#14385c;
+--c-speed:#b88700;--c-susp:#c4302b;--c-inhibit:#2b2f36;--c-const:#c85a14;--c-track:#1d78a6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 "BIZ UDPGothic","Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif}
+main{max-width:720px;margin:0 auto;padding:24px 16px 72px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:3px solid var(--navy);padding-bottom:8px}
+h1{font-size:1.6rem;margin:0;letter-spacing:.04em}
+h2{font-size:1.15rem;margin:40px 0 8px}
+.who{color:var(--sub);font-size:.9rem}
+.who a{color:var(--navy)}
+fieldset{border:1px solid var(--line);background:var(--panel);margin:16px 0 0;padding:8px 16px 16px;}
+legend{font-weight:700;padding:0 6px}
+label{display:block;margin-top:10px;font-size:.9rem;color:var(--sub)}
+input[type=text],input[type=number],input[type=datetime-local],textarea{display:block;width:100%;font:inherit;color:var(--ink);padding:8px 10px;margin-top:2px;border:1px solid var(--line);background:#fff}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid #7aa7d6;outline-offset:1px}
+.types{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.types button{font:inherit;padding:10px 12px;text-align:left;background:#fff;border:1px solid var(--line);border-left:8px solid var(--c);cursor:pointer;color:var(--ink)}
+.types button.on{background:var(--c);color:#fff;border-color:var(--c)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.radio{display:inline-flex;align-items:center;gap:6px;margin:8px 20px 0 0;color:var(--ink);font-size:1rem}
+#users{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:2px 12px;margin-top:8px;max-height:300px;overflow:auto;border-top:1px solid var(--line);padding-top:8px}
+#users label{margin:0;color:var(--ink);font-size:1rem;display:flex;gap:6px;align-items:center}
+.tools{margin-top:10px;font-size:.9rem;color:var(--sub);display:flex;gap:8px;align-items:center}
+.btn{font:inherit;padding:10px 20px;border:1px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer}
+.btn.main{background:var(--navy);color:#fff}
+.btn.small{padding:2px 10px;font-size:.85rem}
+.btn.danger{border-color:var(--c-susp);color:var(--c-susp)}
+.actions{margin-top:20px;display:flex;gap:12px}
+#toast{margin-top:12px;min-height:1.6em;font-weight:700}
+#toast.err{color:var(--c-susp)}
+#toast.ok{color:#1d6b3a}
+ul{list-style:none;margin:0;padding:0}
+#list li{background:var(--panel);border:1px solid var(--line);border-left:8px solid var(--c,var(--line));padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+#list .meta{color:var(--sub);font-size:.85rem}
+#list .off{opacity:.55}
+.empty{color:var(--sub);border-left-color:var(--line)!important}
+dialog{border:1px solid var(--line);padding:20px;max-width:480px;width:calc(100% - 32px);color:var(--ink)}
+dialog::backdrop{background:rgba(20,30,40,.45)}
+dialog dl{margin:0 0 16px;display:grid;grid-template-columns:7em 1fr;gap:4px 8px}
+dialog dt{color:var(--sub)}dialog dd{margin:0;word-break:break-all}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:no-preference){.types button{transition:background .12s}}
+</style>
+</head>
+<body>
+<main>
+  <header><h1>運転通告の送信</h1><div class="who"><span id="who"></span> <a href="/logout">ログアウト</a></div></header>
+  <p id="gate"></p>
+
+  <div id="app" hidden>
+    <form id="form" novalidate>
+      <fieldset><legend>通告の種類</legend><div class="types" id="types"></div></fieldset>
+      <fieldset><legend>内容</legend><div id="fields"></div>
+        <label>補足(任意)<textarea id="memo" rows="2"></textarea></label></fieldset>
+      <fieldset><legend>有効期間(空欄なら即時・期限なし)</legend>
+        <div class="two"><label>開始<input type="datetime-local" id="from"></label><label>終了<input type="datetime-local" id="until"></label></div></fieldset>
+      <fieldset><legend>宛先</legend>
+        <label class="radio"><input type="radio" name="to" value="all" checked>全員</label>
+        <label class="radio"><input type="radio" name="to" value="some">運転士を指定</label>
+        <div id="pick" hidden>
+          <div class="tools"><button type="button" class="btn small" id="all">全選択</button><button type="button" class="btn small" id="none">全解除</button><span id="count"></span></div>
+          <div id="users"></div>
+        </div></fieldset>
+      <div class="actions"><button class="btn main" type="submit">内容を確認する</button></div>
+      <div id="toast" role="status"></div>
+    </form>
+
+    <h2>送信した通告</h2>
+    <ul id="list"></ul>
+  </div>
+</main>
+
+<dialog id="dlg"><dl id="sum"></dl>
+  <div class="actions" style="margin:0"><button class="btn main" id="send">この内容で送信</button><button class="btn" id="back">戻る</button></div>
+</dialog>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const TYPES={
+  speed_restriction:{label:"徐行",c:"--c-speed",span:true,fields:[["speed","制限速度(km/h)","number"],["reason","理由","text"]]},
+  suspension:{label:"運転見合わせ",c:"--c-susp",span:true,fields:[["reason","理由","text"],["resumeEstimate","再開見込み(任意)","text",1]]},
+  inhibit:{label:"抑止",c:"--c-inhibit",span:true,fields:[["reason","理由","text"]]},
+  construction:{label:"工事",c:"--c-const",span:true,fields:[["description","工事内容","text"],["track","番線(任意)","text",1]]},
+  track_change:{label:"着発線変更",c:"--c-track",span:false,fields:[["track","番線","text"]]}
+};
+let type="speed_restriction", users=[], pending=null;
+
+async function api(path,opt){
+  const r=await fetch(path,opt), d=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error||"エラー("+r.status+")");
+  return d;
+}
+function toast(msg,cls){const t=$("#toast");t.textContent=msg;t.className=cls||""}
+
+function renderTypes(){
+  $("#types").innerHTML=Object.entries(TYPES).map(([k,t])=>
+    `<button type="button" data-t="${k}" style="--c:var(${t.c})" class="${k===type?"on":""}">${t.label}</button>`).join("");
+}
+function renderFields(){
+  const t=TYPES[type];
+  $("#fields").innerHTML=
+    `<label>路線${t.span?"":"(任意)"}<input type="text" id="f-line" ${t.span?"required":""}></label>`+
+    (t.span?`<div class="two"><label>始点駅<input type="text" id="f-from" required></label><label>終点駅<input type="text" id="f-to" required></label></div>`
+           :`<label>駅<input type="text" id="f-from" required></label>`)+
+    t.fields.map(([k,l,ty,opt])=>`<label>${l}<input type="${ty}" data-k="${k}" ${opt?"":"required"}></label>`).join("");
+  renderTypes();
+}
+function renderUsers(){
+  $("#users").innerHTML=users.length?users.map(u=>
+    `<label><input type="checkbox" value="${esc(u.discord_id)}">${esc(u.username)}</label>`).join("")
+    :'<span class="meta">運転士がまだログインしていません。</span>';
+  updateCount();
+}
+function updateCount(){$("#count").textContent=`選択中 ${$$("#users input:checked").length}/${users.length}`}
+
+function collect(){
+  const t=TYPES[type], payload={};
+  $$("[data-k]").forEach(i=>{if(i.value!=="")payload[i.dataset.k]=i.type==="number"?Number(i.value):i.value});
+  const iso=v=>v?new Date(v).toISOString():null;  // 端末の時刻(日本時間)からUTCへ変換
+  const some=document.querySelector("input[name=to]:checked").value==="some";
+  const picked=some?$$("#users input:checked"):[];
+  return {
+    body:{type,line:$("#f-line").value||null,from:$("#f-from").value,to:t.span?$("#f-to").value:null,
+      payload,memo:$("#memo").value||null,validFrom:iso($("#from").value),validUntil:iso($("#until").value),
+      recipients:picked.map(i=>i.value)},
+    some, names:picked.map(i=>i.parentNode.textContent)
+  };
+}
+
+$("#form").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(!$("#form").reportValidity()) return;
+  const c=collect();
+  if(c.some&&!c.body.recipients.length) return toast("宛先の運転士を1人以上選んでください","err");
+  if(c.body.validFrom&&c.body.validUntil&&c.body.validFrom>=c.body.validUntil) return toast("終了は開始より後にしてください","err");
+  pending=c.body; toast("");
+  const t=TYPES[type], b=c.body;
+  const rows=[["種類",t.label],["区間",(b.line?b.line+" ":"")+b.from+(b.to?" 〜 "+b.to:"")]];
+  $$("[data-k]").forEach(i=>{if(i.value)rows.push([i.parentNode.firstChild.textContent.replace("(任意)",""),i.value])});
+  if(b.memo)rows.push(["補足",b.memo]);
+  rows.push(["期間",($("#from").value||"即時").replace("T"," ")+" 〜 "+($("#until").value||"期限なし").replace("T"," ")]);
+  rows.push(["宛先",c.some?c.names.length+"人: "+c.names.join("、"):"全員"]);
+  $("#sum").innerHTML=rows.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+  $("#dlg").showModal();
+});
+$("#back").onclick=()=>$("#dlg").close();
+$("#send").onclick=async()=>{
+  $("#send").disabled=true;
+  try{
+    await api("/api/notices",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(pending)});
+    $("#dlg").close(); $("#form").reset(); renderFields(); $("#pick").hidden=true; $$("#users input").forEach(i=>i.checked=false); updateCount();
+    toast("送信しました","ok"); loadList();
+  }catch(err){$("#dlg").close();toast(err.message,"err")}
+  finally{$("#send").disabled=false}
+};
+
+$("#types").addEventListener("click",e=>{const b=e.target.closest("button");if(b){type=b.dataset.t;renderFields()}});
+$$("input[name=to]").forEach(r=>r.addEventListener("change",()=>{$("#pick").hidden=document.querySelector("input[name=to]:checked").value!=="some"}));
+$("#users").addEventListener("change",updateCount);
+$("#all").onclick=()=>{$$("#users input").forEach(i=>i.checked=true);updateCount()};
+$("#none").onclick=()=>{$$("#users input").forEach(i=>i.checked=false);updateCount()};
+
+async function loadList(){
+  const rows=await api("/api/notices/issued"), now=new Date().toISOString();
+  $("#list").innerHTML=rows.length?rows.map(r=>{
+    const t=TYPES[r.type]||{label:r.type,c:"--line"};
+    const st=r.status==="cancelled"?"取り消し済み":(r.valid_until&&r.valid_until<=now)?"期限切れ":"有効";
+    const live=st==="有効";
+    return `<li class="${live?"":"off"}" style="--c:var(${t.c})"><div><b>${esc(t.label)}</b> ${esc((r.line||"")+" "+(r.from_station||"")+(r.to_station?" 〜 "+r.to_station:""))}
+      
+      <div class="meta">${st} / ${r.recipients.length?r.recipients.length+"人宛て":"全員宛て"} / 確認 ${r.ack_count}/${r.recipients.length||users.length} / ${new Date(r.issued_at).toLocaleString("ja-JP")}</div></div>${live?`<button class="btn small danger" data-id="${esc(r.id)}">取り消し</button>`:""}</li>`}).join("")
+    :'<li class="empty">送信した通告はまだありません。上のフォームから送信できます。</li>';
+}
+$("#list").addEventListener("click",async e=>{
+  const b=e.target.closest("button[data-id]"); if(!b||!confirm("この通告を取り消しますか?")) return;
+  try{await api("/api/notices/"+b.dataset.id,{method:"PATCH"});toast("取り消しました","ok");loadList()}catch(err){toast(err.message,"err")}
+});
+
+(async function init(){
+  let me;
+  try{me=await api("/me")}catch{$("#gate").innerHTML='ログインが必要です。<a href="/login">Discordでログイン</a>';return}
+  $("#who").textContent=me.user.username;
+  if(!me.canSend){$("#gate").textContent="通告の送信には、送信役のロールが必要です。";return}
+  $("#app").hidden=false; renderFields();
+  try{users=await api("/api/users");renderUsers();await loadList()}catch(err){toast(err.message,"err")}
+})();
+</script>
+</body>
+</html>
