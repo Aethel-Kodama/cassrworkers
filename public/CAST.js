@@ -16,10 +16,10 @@ if (location.hostname !== "127.0.0.1" && location.hostname !== "localhost") {
     let startingsta = 2;
     let nowsta = startingsta;
     let nnowsta = nowsta;
-    let kudaritakemin =      [1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,2 ,8 ,8 ,8 ]//index0->SSR-NSR
-    let kudaritakesec =      [45,55,55,55,10,15,25,55,10,10,10,10]
-    let noboritakemin =      [2 ,1 ,2 ,1 ,1 ,1 ,1 ,2 ,1 ,3 ,3 ,3 ]
-    let noboritakesec =      [15,25,10,55,10,10,10, 0,40,34,34,34]
+    let kudaritakemin =       [1 ,1 ,1 ,1 ,1 ,1 ,1 ,1 ,2 ,8 ,8 ,8 ]//index0->SSR-NSR
+    let kudaritakesec =       [45,55,55,55,10,15,25,55,10,10,10,10]
+    let noboritakemin =       [2 ,1 ,2 ,1 ,1 ,1 ,1 ,2 ,1 ,3 ,3 ,3 ]
+    let noboritakesec =       [15,25,10,55,10,10,10, 0,40,34,34,34]
     const rapidkudaritakemin = [1 ,1 ,1 ,1 ,0 ,0 ,0 ,1 ,1 ,8 ,8 ,8 ]//index0->SSR-NSR
     const rapidkudaritakesec = [ 5,15, 0,15,45,30,45,30,25,10,10,10]
     const rapidnoboritakemin = [1 ,1 ,0 ,0 ,1 ,0 ,1 ,0 ,1 ,3, 3 ,3 ]
@@ -118,9 +118,10 @@ function delay(dat){
     if (currenttime){
         if(currenttime>dat){
             delayMs = currenttime-dat;
-            dh = Math.floor(delayMs / (60*60*1000));
-            dm = Math.floor((delayMs % (60*60*1000)) / 60000);
-            ds = Math.floor(((delayMs/1000)%60))+1
+            const total = Math.ceil(delayMs/1000);
+            dh = Math.floor(total/3600);
+            dm = Math.floor(total%3600/60);
+            ds = total%60;
             if(dh!=0){
                 delays.textContent="発車まで\u2007"+dh+" 時間 "+String(dm).padStart(2,"0")+" 分 "+String(ds).padStart(2,"0")+" 秒"
             }
@@ -147,9 +148,10 @@ function delay(dat){
         }
         else{
             delayMs = (currenttime-dat)*-1;
-            dh = Math.floor(delayMs / (60*60*1000));
-            dm = Math.floor((delayMs % (60*60*1000)) / 60000);
-            ds = (Math.floor((((delayMs/1000)%60)/15)) * 15);
+            const total = Math.ceil(delayMs/1000);
+            dh = Math.floor(total/3600);
+            dm = Math.floor(total%3600/60);
+            ds = total%60;
             if(dh!=0){
                 delays.textContent=dh+" 時間 "+String(dm).padStart(2,"0")+" 分 "+String(ds).padStart(2,"0")+" 秒延";
             }
@@ -240,15 +242,15 @@ function nstaname(){
         $(".次々々々駅 .min").text(noboritakemin[nowsta-3]); $(".次々々々駅 .sec").text(String(noboritakesec[nowsta-3] ?? "").padStart(2,"0"));
         }
         else if (direction===1){
-            $(".前駅 .min").text(kudaritakemin[nowsta-2]); $(".前駅 .sec").text(String(kudaritakesec[nowsta-2] ?? "").padStart(2,"0"));
+            $(".前駅 .min").text(kudaritakemin[nowsta-2] ?? ""); $(".前駅 .sec").text(String(kudaritakesec[nowsta-2] ?? "").padStart(2,"0"));
  
-            $(".次駅 .min").text(kudaritakemin[nowsta-1]); $(".次駅 .sec").text(String(kudaritakesec[nowsta-1] ?? "").padStart(2,"0"));
+            $(".次駅 .min").text(kudaritakemin[nowsta-1] ?? ""); $(".次駅 .sec").text(String(kudaritakesec[nowsta-1] ?? "").padStart(2,"0"));
  
-            $(".次々駅 .min").text(kudaritakemin[nowsta]); $(".次々駅 .sec").text(String(kudaritakesec[nowsta] ?? "").padStart(2,"0"));
+            $(".次々駅 .min").text(kudaritakemin[nowsta] ?? ""); $(".次々駅 .sec").text(String(kudaritakesec[nowsta] ?? "").padStart(2,"0"));
  
-            $(".次々々駅 .min").text(kudaritakemin[nowsta+1]); $(".次々々駅 .sec").text(String(kudaritakesec[nowsta+1] ?? "").padStart(2,"0"));
+            $(".次々々駅 .min").text(kudaritakemin[nowsta+1] ?? ""); $(".次々々駅 .sec").text(String(kudaritakesec[nowsta+1] ?? "").padStart(2,"0"));
  
-            $(".次々々々駅 .min").text(kudaritakemin[nowsta+2]); $(".次々々々駅 .sec").text(String(kudaritakesec[nowsta+2] ?? "").padStart(2,"0"));
+            $(".次々々々駅 .min").text(kudaritakemin[nowsta+2] ?? ""); $(".次々々々駅 .sec").text(String(kudaritakesec[nowsta+2] ?? "").padStart(2,"0"));
         }
     })
 }
@@ -295,7 +297,7 @@ terminating();
  
 function stop(){
     if (nowsta!=startingsta){
-    currenttime.setSeconds(currenttime.getSeconds()+stoptime[nowsta-1*direction])
+    currenttime.setSeconds(currenttime.getSeconds()+stoptime[nowsta-1])
     }
     $(".次駅停車時分").text(String(currenttime.getHours()).padStart(2,"\u2007")+":"+String(currenttime.getMinutes()).padStart(2, "0"))
     if(pass===false){
@@ -307,7 +309,7 @@ function stop(){
 }
 function mstop(){
     if (nowsta!=startingsta){
-    currenttime.setSeconds(currenttime.getSeconds()-stoptime[nowsta-1*direction])
+    currenttime.setSeconds(currenttime.getSeconds()-stoptime[nowsta-1])
     }
     $(".次駅停車時分").text(String(currenttime.getHours()).padStart(2,"\u2007")+":"+String(currenttime.getMinutes()).padStart(2, "0"))
     if(pass===false){
@@ -329,7 +331,6 @@ function setNextDepartureTime(){
     if (!departureTime2 || departureTime2.value.trim() === "11:45:14") {
         return;
     }
- 
     const nextDeparture = currenttime
         ? new Date(currenttime.getTime() + 120000)
         : new Date(Date.now() + 120000);
@@ -343,7 +344,7 @@ const stoporpass2 = document.querySelector(".次々駅詳細 .停通");
 const stoporpass3 = document.querySelector(".次々々駅詳細 .停通");
 let pass = true;
 function stoporpasses(type,nowsta){
-    if (type === "快速" && !(rapidstopsta.includes(nowsta))||type === "準急" && !(JUNstopsta.includes(nowsta))||type === "急行" && !(expressstopsta.includes(nowsta))||type === "快急" && !(Rapexpstopsta.includes(nowsta))||type === "特急" && !(Limexpstopsta.includes(nowsta))){
+    if (type === "快速" && !(rapidstopsta.includes(nowsta))||type === "準急" && !(JUNstopsta.includes(nowsta))||type === "急行" && !(expressstopsta.includes(nowsta))||type === "快急" && !(Rapexpstopsta.includes(nowsta))||type === "特急" && !(Limexpstopsta.includes(nowsta))||nowsta == terminatesta){
         stoporpass.src = 'passsign.png';
         pass=true;
     }
@@ -381,7 +382,7 @@ if (back) { // 戻るボタンを押したときの挙動まとめ
                 terminating();
                 staname();
                 nstaname();
-                                
+                stoporpasses(type,nowsta);                
                 meachDate();
             }
             if (next.textContent=="停車")
@@ -521,11 +522,10 @@ function terminatearr(starttime,startsta,termsta){
     let timetoarrs = 0;
     for (let i = 0; i < Math.abs(termsta-startsta); i++){
         if (startsta>termsta){//上り
-            timetoarrm+=noboritakemin[startsta-i]
-            timetoarrs+=noboritakesec[startsta-i]
+            timetoarrm+=noboritakemin[startsta-1-i]
+            timetoarrs+=noboritakesec[startsta-1-i]
             if (i!=0&&i!=Math.abs(termsta-startsta)){
                 timetoarrs+=stoptime[startsta-1-i]}
-            
         }
         if (startsta<termsta){//下り
             timetoarrm+=kudaritakemin[startsta+i]
