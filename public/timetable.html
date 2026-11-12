@@ -18,7 +18,7 @@
         list-style: none;
         padding: 0;
         margin: 0;
-        font-weight: 1000;
+        font-weight: 500;
         justify-content:center;
     }
     #timetable > li {
@@ -27,8 +27,9 @@
     
     }
     .標準時分 {
+        position: relative;
         width: 30px;
-        border: 1px solid black;
+        border: 0.5px solid black;
         text-align: center;
     }
     .標準時分 .分 {
@@ -37,7 +38,7 @@
     .駅名 {
     height: 30px;
     width: 70px;
-    border: 1px solid black;
+    border: 0.5px solid black;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -46,8 +47,8 @@
     .発時刻 {
         width: 80px;
         display: flex;
-        border: 1px solid black;
-        justify-content: left;
+        border: 0.5px solid black;
+        justify-content: center;
         align-items: baseline;
     }
     .発時分 {
@@ -59,8 +60,8 @@
     .着時刻 {
         width: 80px;
         display: flex;
-        border: 1px solid black;
-        justify-content: left;
+        border: 0.5px solid black;
+        justify-content: center;
         align-items: baseline;
     }
     .着時分 {
@@ -71,7 +72,7 @@
     }
     .番線 {
         width: 30px;
-        border: 1px solid black;
+        border: 0.5px solid black;
         text-align: center;
     }
     .進制限 {
@@ -79,7 +80,7 @@
         font-size: 0.6em;
         display: flex;
         flex-direction: column;
-        border: 1px solid black;
+        border: 0.5px solid black;
     }
     #info{
         display:flex;
@@ -113,8 +114,16 @@
         color:red;
     }
     #info .制限{
-        width: 105px;
+        align-items: center;
+        justify-content: center;
+        align-self: center;
+        text-align: center;
+        width: 110px;
         font-size:45px;
+    }
+    .標準時分上{
+        display:flex;
+        vertical-align:top;
     }
 </style>
 </head>
@@ -128,26 +137,31 @@
         <li class="編成">1000</li>
         <li class="制限">130</li>
     </ul>
-    <ul id="timetable">
-        <li class="標準時分">
-            <span class="時">1</span>
-            <span class="分">30</span>
-        </li>
-        <li class="駅名">木曽川</li>
-        <li class="発時刻">
-            <span class="発時分">08:00</span>
-            <span class="発秒">00</span>
-        </li>
-        <li class="着時刻">
-            <span class="着時分">08:00</span>
-            <span class="着秒">00</span>
-        </li>
-        <li class="番線">上1</li>
-        <li class="進制限">
-        <span class="進出制限">45</span>
-        <span class="進入制限">30</span>
-        </li>
-    </ul>
+    <div>
+        <ul id="timetable">
+            <div class="標準時分上">
+                <div style="border:1px solid black; height:10px;top:0px;bottom:0px"></div>
+                <li class="標準時分">
+                    <span class="時">1</span>
+                    <span class="分">30</span>
+                </li>
+            </div>
+            <li class="駅名">木曽川</li>
+            <li class="発時刻">
+                <span class="発時分">08:00</span>
+                <span class="発秒">00</span>
+            </li>
+            <li class="着時刻">
+                <span class="着時分">08:00</span>
+                <span class="着秒">00</span>
+            </li>
+            <li class="番線">上1</li>
+            <li class="進制限">
+            <span class="進出制限">45</span>
+            <span class="進入制限">30</span>
+            </li>
+        </ul>
+    </div>
 <script>
     
 </script>
